@@ -116,10 +116,10 @@ class Main:
         # Другими словами, то, что нужно для каждого отдельно уровня
 
         # Здесь подъехала фигня со спрайтами
-        all_sprites = pygame.sprite.LayeredUpdates()
+        background_group = pygame.sprite.Group()
+        all_sprites = pygame.sprite.LayeredUpdates()        
         player_group = pygame.sprite.GroupSingle()
         platforms_group = pygame.sprite.Group()
-        background_group = pygame.sprite.Group()
 
         bck = Background(background_group)
         all_sprites.add(bck, layer=-1)
@@ -163,30 +163,53 @@ class Main:
             # Сдвиг по камере(? Этот момент нужно продумать, пока не очень понимаю, как класс камеры должен работать)
             camera.update(player)
             for sprite in all_sprites:
-                camera.apply(sprite)            
-            # Отрисовка всех объектов-спрайтов
-            all_sprites.draw(self.screen)
-
-            # Возвратный сдвиг по камере(?)
+                camera.apply(sprite)
+            camera.word_r, camera.word_l = False, False
+            camera.word_up, camera.word_down = False, False
             
-            #
+            all_sprites.draw(self.screen)
+            
+            
             pygame.display.flip()
-            self.clock.tick(FPS)# Повторюсь, не уверен, как будет и должно работать
+            self.clock.tick(FPS)
 
+
+class Background(pygame.sprite.Sprite):
+    def __init__(self, background_group):
+        super().__init__(background_group)
+        self.image = pygame.transform.scale(load_image(GAME_BACKGROUND_FILENAME), (SCREEN_WIDTH, SCREEN_HEIGHT))
+        self.rect = self.image.get_rect()
+        
+        
 class Camera:
     def __init__(self):
-        self.dx = 0
-        self.dy = 0
-     
-        # сдвинуть объект obj на смещение камеры
+        self.dx = SCREEN_WIDTH
+        self.dy = SCREEN_HEIGHT
+        self.word_r = False
+        self.word_l = False
+        self.word_up = False
+        self.word_down = False
+
     def apply(self, obj):
-        obj.rect.x += self.dx
-        obj.rect.y += self.dy
-     
-        # позиционировать камеру на объекте target
+        if self.word_r:
+            obj.rect.x -= self.dx
+        if self.word_l:
+            obj.rect.x += self.dx
+        if self.word_up:
+            obj.rect.y -= self.dy
+        if self.word_down:
+            obj.rect.y += self.dy      
+        
     def update(self, target):
-        self.dx = -(target.rect.x + target.rect.w // 2 - SCREEN_WIDTH // 2)
-        self.dy = -(target.rect.y + target.rect.h // 2 - SCREEN_HEIGHT // 2)
+        if target.rect.x >= SCREEN_WIDTH:
+            self.word_r = True
+        if target.rect.x <= 0:
+            self.word_l = True      
+        if target.rect.y >= SCREEN_HEIGHT:
+            self.word_up = True 
+        if target.rect.y <= 0:
+            self.word_down = True            
+            
     
 
 
@@ -195,6 +218,9 @@ def define_constants():
     global LEVEL_FILENAME
     global DCT_FOR_MOVING_PLAYER, SYMB_FOR_PLATFORM_IN_LEVEL_FILE
     global SYMB_FOR_PLAYER_IN_LEVEL_FILE
+    global GAME_BACKGROUND_FILENAME
+    global background_group 
+    global all_sprites
     SCREEN_WIDTH = 1250
     SCREEN_HEIGHT = 1000
     FPS = 60
@@ -204,7 +230,7 @@ def define_constants():
     SYMB_FOR_PLATFORM_IN_LEVEL_FILE = '#'
     SYMB_FOR_PLAYER_IN_LEVEL_FILE = '@'
     DCT_FOR_MOVING_PLAYER = {pygame.K_UP: 2, pygame.K_LEFT: 1, pygame.K_RIGHT: 0}
-
+    GAME_BACKGROUND_FILENAME = 'game_background.png'
 
 if __name__ == '__main__':
     # Здесь же определяются все константы(с отдельной функцией код смотрится лучше,

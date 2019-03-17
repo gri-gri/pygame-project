@@ -2,7 +2,7 @@ from other_sprites import Tile
 import pygame
 
 PLAYER_IMAGE_FILENAME = 'player.png'
-PLAYER_MOVEMENT_SPEED = 1
+PLAYER_MOVEMENT_SPEED = 1 / 6
 JUMP_POWER = 10
 GRAVITY = 0.3
 
@@ -24,8 +24,8 @@ class Player(Tile):
                 '''else:
                     self.x_velocity = 0'''
             else:
-                if self.x_velocity < 13:
-                    self.x_velocity += PLAYER_MOVEMENT_SPEED
+                if self.x_velocity < 10:
+                    self.x_velocity += PLAYER_MOVEMENT_SPEED 
         if right:
             if not self.onGround:
                 if self.x_velocity > -6:
@@ -33,7 +33,7 @@ class Player(Tile):
                 '''else:
                     self.x_velocity = 0'''                
             else:
-                if self.x_velocity > -13:
+                if self.x_velocity > -10:
                     self.x_velocity -= PLAYER_MOVEMENT_SPEED
         if not(left or right):
             self.x_velocity = 0
