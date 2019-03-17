@@ -6,6 +6,41 @@ from helping_functions import *
 from player import *
 
 
+SYMB_FOR_SPARE_PLACE_IN_LEVEl_FILE = '.'
+
+def load_level(filename):
+    filename = os.path.join("data", filename)
+    with open(filename, 'r') as mapFile:
+        level_map = [line.strip() for line in mapFile]
+    max_width = max(map(len, level_map))
+    return list(map(lambda x: x.ljust(max_width, SYMB_FOR_SPARE_PLACE_IN_LEVEl_FILE), level_map))
+
+def load_image(name, color_key=None):
+    fullname = os.path.join('data', name)
+    try:
+        image = pygame.image.load(fullname)
+    except pygame.error as message:
+        print('Cannot load image:', name)
+        raise SystemExit(message)
+    if color_key == -2:
+        pass
+    elif color_key is not None:
+        if color_key == -1:
+            color_key = image.get_at((0, 0))
+        image.set_colorkey(color_key)
+        image = image.convert()
+    else:
+        image = image.convert_alpha()
+    return image
+
+def terminate():
+    # Позже можно добавить какое-либо сохранение прогресса в игре, пока так
+    # Надо будет потом различать выход из уровня в главное меню из игры и выход из программы из игры
+    # Но пока будет только выход сразу из программы без сохранения))
+    try:
+        pygame.quit()
+    except Exception:
+        pass
 class Main:
     def __init__(self):
         pygame.init()
@@ -89,8 +124,10 @@ class Main:
         bck = Background(background_group)
         all_sprites.add(bck, layer=-1)
 
-        level = load_level(LEVEL_FILENAME)
+        #level = load_level(LEVEL_FILENAME)
+        level = load_level("level3.txt")
         player = None
+        camera = Camera()
         for y in range(len(level)):
             for x in range(len(level[y])):
                 if level[y][x] == SYMB_FOR_PLATFORM_IN_LEVEL_FILE:
@@ -124,15 +161,33 @@ class Main:
             self.screen.fill((0, 0, 0))
 
             # Сдвиг по камере(? Этот момент нужно продумать, пока не очень понимаю, как класс камеры должен работать)
-
+            camera.update(player)
+            for sprite in all_sprites:
+                camera.apply(sprite)            
             # Отрисовка всех объектов-спрайтов
             all_sprites.draw(self.screen)
 
             # Возвратный сдвиг по камере(?)
-
+            
             #
             pygame.display.flip()
-            self.clock.tick(FPS)  # Повторюсь, не уверен, как будет и должно работать
+            self.clock.tick(FPS)# Повторюсь, не уверен, как будет и должно работать
+
+class Camera:
+    def __init__(self):
+        self.dx = 0
+        self.dy = 0
+     
+        # сдвинуть объект obj на смещение камеры
+    def apply(self, obj):
+        obj.rect.x += self.dx
+        obj.rect.y += self.dy
+     
+        # позиционировать камеру на объекте target
+    def update(self, target):
+        self.dx = -(target.rect.x + target.rect.w // 2 - SCREEN_WIDTH // 2)
+        self.dy = -(target.rect.y + target.rect.h // 2 - SCREEN_HEIGHT // 2)
+    
 
 
 def define_constants():
@@ -140,8 +195,8 @@ def define_constants():
     global LEVEL_FILENAME
     global DCT_FOR_MOVING_PLAYER, SYMB_FOR_PLATFORM_IN_LEVEL_FILE
     global SYMB_FOR_PLAYER_IN_LEVEL_FILE
-    SCREEN_WIDTH = 1000
-    SCREEN_HEIGHT = 500
+    SCREEN_WIDTH = 1250
+    SCREEN_HEIGHT = 1000
     FPS = 60
     START_BACKGROUND_FILENAME = 'start_background.png'
     END_BACKGROUND_FILENAME = 'end_background.png'
