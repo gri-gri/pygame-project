@@ -4,7 +4,7 @@ import pygame
 PLAYER_IMAGE_FILENAME = 'player.png'
 PLAYER_MOVEMENT_SPEED = 1
 JUMP_POWER = 10
-GRAVITY = 0.35
+GRAVITY = 0.3
 
 
 class Player(Tile):
@@ -12,13 +12,29 @@ class Player(Tile):
         super().__init__(pos, PLAYER_IMAGE_FILENAME, -2, *groups)
         self.x_velocity = 0
         self.y_velocity = 0
+        self.falling_speed = GRAVITY
         self.onGround = False
+        self.jump_sec = 0
 
     def update(self, left, right, up, group_of_platforms):
         if left:
-            self.x_velocity += PLAYER_MOVEMENT_SPEED
+            if not self.onGround:
+                if self.x_velocity < 6:
+                    self.x_velocity += PLAYER_MOVEMENT_SPEED
+                '''else:
+                    self.x_velocity = 0'''
+            else:
+                if self.x_velocity < 13:
+                    self.x_velocity += PLAYER_MOVEMENT_SPEED
         if right:
-            self.x_velocity -= PLAYER_MOVEMENT_SPEED
+            if not self.onGround:
+                if self.x_velocity > -6:
+                    self.x_velocity -= PLAYER_MOVEMENT_SPEED
+                '''else:
+                    self.x_velocity = 0'''                
+            else:
+                if self.x_velocity > -13:
+                    self.x_velocity -= PLAYER_MOVEMENT_SPEED
         if not(left or right):
             self.x_velocity = 0
         self.rect.x += self.x_velocity
@@ -27,8 +43,11 @@ class Player(Tile):
         if up:
             if self.onGround:
                 self.y_velocity -= JUMP_POWER
+                self.jump_sec = 0
         if not self.onGround:
-            self.y_velocity += GRAVITY
+            self.jump_sec += 1
+            self.y_velocity += self.falling_speed
+            self.falling_speed = GRAVITY * self.jump_sec / 6
         self.onGround = False
         self.rect.y += self.y_velocity
         self.collide(0, self.y_velocity, group_of_platforms)
