@@ -137,30 +137,43 @@ class Main:
                     player = Player((x, y), player_group)
                     all_sprites.add(player, layer=0)
 
-        left, right, up = False, False, False
-        actions_list = [left, right, up]
+        left, right, up, down = False, False, False, False
+        actions_list = [left, right, up, down]
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     terminate()
+                    
+               # if not hold and event.type == pygame.KEYDOWN:
                 if event.type == pygame.KEYDOWN:
                     if event.key in DCT_FOR_MOVING_PLAYER.keys():
                         actions_list[DCT_FOR_MOVING_PLAYER[event.key]] = True
                 if event.type == pygame.KEYUP:
                     if event.key in DCT_FOR_MOVING_PLAYER.keys():
                         actions_list[DCT_FOR_MOVING_PLAYER[event.key]] = False
-                # Здесь также добавляются какие-то события в зависимости от чего-то
-                # В том числе, и прохождение уровня(?), то есть return(?)
+                        
+                '''if pygame.mouse.get_pressed()[0] and player.hor_collision:
+                    hold = True
+                else:
+                    hold = False
+                    
+                if hold and event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_w:
+                        up = True
+                    if event.key == pygame.K_s:
+                        down = True
+                        
+                if hold and event.type == pygame.KEYUP:
+                    if event.key == pygame.K_w:
+                        up = False
+                    if event.key == pygame.K_s:
+                        down = False'''                    
 
-            # Следующие строки необходимо, в зависимости от типа игры и архитектуры программы, заменить на строки кода
-
-            # Изменение всех объектов(на каждую итерацию или в зависимости от какого-то условия), в том числе FPS(?)
-            player.update(*actions_list, platforms_group)
-
+            player.update(*actions_list, hold, platforms_group)
+            #player.update(*actions_list, platforms_group)
             # Возвращение экрана к дефолту
             self.screen.fill((0, 0, 0))
 
-            # Сдвиг по камере(? Этот момент нужно продумать, пока не очень понимаю, как класс камеры должен работать)
             camera.update(player)
             for sprite in all_sprites:
                 camera.apply(sprite)
@@ -168,7 +181,6 @@ class Main:
             camera.word_up, camera.word_down = False, False
             
             all_sprites.draw(self.screen)
-            
             
             pygame.display.flip()
             self.clock.tick(FPS)
@@ -217,10 +229,12 @@ def define_constants():
     global SCREEN_WIDTH, SCREEN_HEIGHT, FPS, START_BACKGROUND_FILENAME, END_BACKGROUND_FILENAME
     global LEVEL_FILENAME
     global DCT_FOR_MOVING_PLAYER, SYMB_FOR_PLATFORM_IN_LEVEL_FILE
+    global hold
     global SYMB_FOR_PLAYER_IN_LEVEL_FILE
     global GAME_BACKGROUND_FILENAME
     global background_group 
     global all_sprites
+    hold = False
     SCREEN_WIDTH = 1250
     SCREEN_HEIGHT = 1000
     FPS = 60
@@ -229,7 +243,7 @@ def define_constants():
     LEVEL_FILENAME = 'level.txt'
     SYMB_FOR_PLATFORM_IN_LEVEL_FILE = '#'
     SYMB_FOR_PLAYER_IN_LEVEL_FILE = '@'
-    DCT_FOR_MOVING_PLAYER = {pygame.K_UP: 2, pygame.K_LEFT: 1, pygame.K_RIGHT: 0}
+    DCT_FOR_MOVING_PLAYER = {pygame.K_w: 2, pygame.K_a: 1, pygame.K_d: 0}
     GAME_BACKGROUND_FILENAME = 'game_background.png'
 
 if __name__ == '__main__':
