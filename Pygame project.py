@@ -15,23 +15,6 @@ def load_level(filename):
     max_width = max(map(len, level_map))
     return list(map(lambda x: x.ljust(max_width, SYMB_FOR_SPARE_PLACE_IN_LEVEl_FILE), level_map))
 
-def load_image(name, color_key=None):
-    fullname = os.path.join('data', name)
-    try:
-        image = pygame.image.load(fullname)
-    except pygame.error as message:
-        print('Cannot load image:', name)
-        raise SystemExit(message)
-    if color_key == -2:
-        pass
-    elif color_key is not None:
-        if color_key == -1:
-            color_key = image.get_at((0, 0))
-        image.set_colorkey(color_key)
-        image = image.convert()
-    else:
-        image = image.convert_alpha()
-    return image
 
 def terminate():
     # Позже можно добавить какое-либо сохранение прогресса в игре, пока так
@@ -41,6 +24,8 @@ def terminate():
         pygame.quit()
     except Exception:
         pass
+    
+    
 class Main:
     def __init__(self):
         pygame.init()
@@ -120,7 +105,7 @@ class Main:
         all_sprites = pygame.sprite.LayeredUpdates()        
         player_group = pygame.sprite.GroupSingle()
         platforms_group = pygame.sprite.Group()
-
+        stairs_group = pygame.sprite.Group()
         bck = Background(background_group)
         all_sprites.add(bck, layer=-1)
 
@@ -133,47 +118,56 @@ class Main:
                 if level[y][x] == SYMB_FOR_PLATFORM_IN_LEVEL_FILE:
                     plt = Platform((x, y), platforms_group)
                     all_sprites.add(plt, layer=0)
+                elif level[y][x] == SYMB_FOR_STAIRS_BLCK_IN_LEVEL_FILE:
+                    strs = Stairs((x, y), stairs_group)
+                    all_sprites.add(strs, layer=0)                
                 elif level[y][x] == SYMB_FOR_PLAYER_IN_LEVEL_FILE:
                     player = Player((x, y), player_group)
                     all_sprites.add(player, layer=0)
 
         left, right, up, down = False, False, False, False
+        hold = False
         actions_list = [left, right, up, down]
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     terminate()
                     
-               # if not hold and event.type == pygame.KEYDOWN:
                 if event.type == pygame.KEYDOWN:
-                    if event.key in DCT_FOR_MOVING_PLAYER.keys():
-                        actions_list[DCT_FOR_MOVING_PLAYER[event.key]] = True
+                    if not hold:
+                        if event.key in DCT_FOR_MOVING_PLAYER.keys():
+                            actions_list[DCT_FOR_MOVING_PLAYER[event.key]] = True
+                    else:
+                        if player.stair_coll:
+                            if event.key == pygame.K_w:
+                                up = True
+                                #print('up')
+                            if event.key == pygame.K_s:
+                                down = True  
+                                
                 if event.type == pygame.KEYUP:
-                    if event.key in DCT_FOR_MOVING_PLAYER.keys():
-                        actions_list[DCT_FOR_MOVING_PLAYER[event.key]] = False
+                    if not hold:
+                        if event.key in DCT_FOR_MOVING_PLAYER.keys():
+                            actions_list[DCT_FOR_MOVING_PLAYER[event.key]] = False
+                    else:
+                        if player.stair_coll:
+                            if event.key == pygame.K_w:
+                                up = False
+                            if event.key == pygame.K_s:
+                                down = False
                         
-                '''if pygame.mouse.get_pressed()[0] and player.hor_collision:
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                #if pygame.mouse.get_pressed()[0]:
                     hold = True
-                else:
+                
+                if event.type == pygame.MOUSEBUTTONUP:
                     hold = False
-                    
-                if hold and event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_w:
-                        up = True
-                    if event.key == pygame.K_s:
-                        down = True
-                        
-                if hold and event.type == pygame.KEYUP:
-                    if event.key == pygame.K_w:
-                        up = False
-                    if event.key == pygame.K_s:
-                        down = False'''                    
-
-            player.update(*actions_list, hold, platforms_group)
+                                   
+            player.update(*actions_list, hold, platforms_group, stairs_group)
             #player.update(*actions_list, platforms_group)
             # Возвращение экрана к дефолту
             self.screen.fill((0, 0, 0))
-
+            print(player.stair_coll, hold)
             camera.update(player)
             for sprite in all_sprites:
                 camera.apply(sprite)
@@ -222,8 +216,6 @@ class Camera:
         if target.rect.y <= 0:
             self.word_down = True            
             
-    
-
 
 def define_constants():
     global SCREEN_WIDTH, SCREEN_HEIGHT, FPS, START_BACKGROUND_FILENAME, END_BACKGROUND_FILENAME
@@ -231,6 +223,7 @@ def define_constants():
     global DCT_FOR_MOVING_PLAYER, SYMB_FOR_PLATFORM_IN_LEVEL_FILE
     global hold
     global SYMB_FOR_PLAYER_IN_LEVEL_FILE
+    global SYMB_FOR_STAIRS_BLCK_IN_LEVEL_FILE
     global GAME_BACKGROUND_FILENAME
     global background_group 
     global all_sprites
@@ -243,6 +236,7 @@ def define_constants():
     LEVEL_FILENAME = 'level.txt'
     SYMB_FOR_PLATFORM_IN_LEVEL_FILE = '#'
     SYMB_FOR_PLAYER_IN_LEVEL_FILE = '@'
+    SYMB_FOR_STAIRS_BLCK_IN_LEVEL_FILE = '|'
     DCT_FOR_MOVING_PLAYER = {pygame.K_w: 2, pygame.K_a: 1, pygame.K_d: 0}
     GAME_BACKGROUND_FILENAME = 'game_background.png'
 

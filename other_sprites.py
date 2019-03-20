@@ -15,3 +15,10 @@ class Tile(pygame.sprite.Sprite):
 class Platform(Tile):
     def __init__(self, pos, *groups):
         super().__init__(pos, 'platform.png', -2, *groups)
+
+
+class Stairs(Tile):
+    def __init__(self, pos, *groups):
+        super().__init__(pos,'stairs.png', -1, *groups)
+        self.image = pygame.transform.scale(self.image, (int(TILE_WIDTH * 1.25), TILE_HEIGHT))
+    
