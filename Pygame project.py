@@ -106,12 +106,16 @@ class Main:
         player_group = pygame.sprite.GroupSingle()
         platforms_group = pygame.sprite.Group()
         stairs_group = pygame.sprite.Group()
+        fire_group = pygame.sprite.Group()
+        groups_to_update_with_camera = [player_group, platforms_group,
+                                        stairs_group, fire_group]
+        
         bck = Background(background_group)
         all_sprites.add(bck, layer=-1)
 
         #level = load_level(LEVEL_FILENAME)
         level = load_level("level3.txt")
-        player = None
+        player = spawnpoint = None
         camera = Camera()
         for y in range(len(level)):
             for x in range(len(level[y])):
@@ -120,10 +124,16 @@ class Main:
                     all_sprites.add(plt, layer=0)
                 elif level[y][x] == SYMB_FOR_STAIRS_BLCK_IN_LEVEL_FILE:
                     strs = Stairs((x, y), stairs_group)
-                    all_sprites.add(strs, layer=0)                
+                    all_sprites.add(strs, layer=1)
+                elif level[y][x] == SYMB_FOR_FIRE_IN_LEVEL_FILE:
+                    strs = Fire((x, y), fire_group)
+                    all_sprites.add(strs, layer=1)
                 elif level[y][x] == SYMB_FOR_PLAYER_IN_LEVEL_FILE:
+                    start_level_point = (x, y)
+                    spawnpoint = (x, y)
                     player = Player((x, y), player_group)
-                    all_sprites.add(player, layer=0)
+                    all_sprites.add(player, layer=2)
+                    player.groups = player.groups()
 
         left, right, up, down = False, False, False, False
         hold = False
@@ -163,14 +173,16 @@ class Main:
                 if event.type == pygame.MOUSEBUTTONUP:
                     hold = False
                                    
-            player.update(*actions_list, hold, platforms_group, stairs_group)
+            player.update(*actions_list, hold, platforms_group,
+                          stairs_group, fire_group, spawnpoint)
             #player.update(*actions_list, platforms_group)
             # Возвращение экрана к дефолту
             self.screen.fill((0, 0, 0))
-            print(player.stair_coll, hold)
+            # print(player.stair_coll, hold)
             camera.update(player)
-            for sprite in all_sprites:
-                camera.apply(sprite)
+            for group in groups_to_update_with_camera:
+                for sprite in group:
+                    camera.apply(sprite)
             camera.word_r, camera.word_l = False, False
             camera.word_up, camera.word_down = False, False
             
@@ -216,17 +228,9 @@ class Camera:
         if target.rect.y <= 0:
             self.word_down = True            
             
+    
 
-def define_constants():
-    global SCREEN_WIDTH, SCREEN_HEIGHT, FPS, START_BACKGROUND_FILENAME, END_BACKGROUND_FILENAME
-    global LEVEL_FILENAME
-    global DCT_FOR_MOVING_PLAYER, SYMB_FOR_PLATFORM_IN_LEVEL_FILE
-    global hold
-    global SYMB_FOR_PLAYER_IN_LEVEL_FILE
-    global SYMB_FOR_STAIRS_BLCK_IN_LEVEL_FILE
-    global GAME_BACKGROUND_FILENAME
-    global background_group 
-    global all_sprites
+if __name__ == '__main__':
     hold = False
     SCREEN_WIDTH = 1250
     SCREEN_HEIGHT = 1000
@@ -237,12 +241,8 @@ def define_constants():
     SYMB_FOR_PLATFORM_IN_LEVEL_FILE = '#'
     SYMB_FOR_PLAYER_IN_LEVEL_FILE = '@'
     SYMB_FOR_STAIRS_BLCK_IN_LEVEL_FILE = '|'
+    SYMB_FOR_FIRE_IN_LEVEL_FILE = 'F'
     DCT_FOR_MOVING_PLAYER = {pygame.K_w: 2, pygame.K_a: 1, pygame.K_d: 0}
     GAME_BACKGROUND_FILENAME = 'game_background.png'
-
-if __name__ == '__main__':
-    # Здесь же определяются все константы(с отдельной функцией код смотрится лучше,
-    # и это единственное место, где функция глобалит)
-    define_constants()
 
     main = Main()

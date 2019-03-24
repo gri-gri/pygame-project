@@ -1,5 +1,6 @@
 from other_sprites import Tile
 import pygame
+from time import sleep
 
 PLAYER_IMAGE_FILENAME = 'player.png'
 PLAYER_MOVEMENT_SPEED = 1 / 6
@@ -18,8 +19,23 @@ class Player(Tile):
         self.onGround = False
         self.stair_coll = False
         self.jump_sec = 0
+        self.stay_not_alive = 0
 
-    def update(self, left, right, up, down, hold, group_of_platforms, stair_group):
+    def update(self, left, right, up, down, hold, group_of_platforms,
+               stair_group, enemies_group, spawnpoint):
+        if self.stay_not_alive > 30:
+            self.stay_not_alive -= 1
+            return None
+        if self.stay_not_alive > 1:
+            super().kill()
+            self.x_velocity = 0
+            self.y_velocity = 0
+            super().move(spawnpoint)
+            self.stay_not_alive -= 1
+            return None
+        elif self.stay_not_alive == 1:
+            super().add(self.groups)
+            self.stay_not_alive -= 1
         if left:
             if not self.onGround:
                 if self.x_velocity < 6:
@@ -40,8 +56,9 @@ class Player(Tile):
         self.rect.x += self.x_velocity
         self.collide(self.x_velocity, 0, group_of_platforms)
         self.collide_stairs(stair_group)
-        
-        
+        if self.collide_enemies(enemies_group):
+            self.stay_not_alive = 40
+
         if hold and self.stair_coll:
             if self.times == 1:
                 self.x_velocity = 0
@@ -95,3 +112,12 @@ class Player(Tile):
                 self.stair_coll = True
             else:
                 self.stair_coll = False
+
+    def collide_enemies(self, enemies):
+        if pygame.sprite.spritecollideany(self, enemies,
+                                          collided=pygame.sprite.collide_mask):
+            return True
+        return False
+
+    def groups(self):
+        return super().groups()
