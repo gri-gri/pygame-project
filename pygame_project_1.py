@@ -107,11 +107,9 @@ class Main:
         platforms_group = pygame.sprite.Group()
         stairs_group = pygame.sprite.Group()
         fire_group = pygame.sprite.Group()
-        bullet_group = pygame.sprite.Group()
-        enemies_group = pygame.sprite.Group()
+        enemy_group = pygame.sprite.Group()
         groups_to_update_with_camera = [player_group, platforms_group,
-                                        stairs_group, fire_group,
-                                        bullet_group,enemies_group]
+                                        stairs_group, fire_group, enemy_group]
         
         bck = Background(background_group)
         all_sprites.add(bck, layer=-1)
@@ -120,6 +118,7 @@ class Main:
         level = load_level("level3.txt")
         player = spawnpoint = None
         camera = Camera()
+        print(len(level))
         for y in range(len(level)):
             for x in range(len(level[y])):
                 if level[y][x] == SYMB_FOR_PLATFORM_IN_LEVEL_FILE:
@@ -127,8 +126,8 @@ class Main:
                     all_sprites.add(plt, layer=0)
                     
                 elif level[y][x] == SYMB_FOR_FIRE_IN_LEVEL_FILE:
-                    strs = Fire((x, y), fire_group)
-                    all_sprites.add(strs, layer=1)
+                    fire = Fire((x, y), fire_group)
+                    all_sprites.add(fire, layer=1)
                     
                 elif level[y][x] == SYMB_FOR_PLAYER_IN_LEVEL_FILE:
                     start_level_point = (x, y)
@@ -136,6 +135,12 @@ class Main:
                     player = Player((x, y), player_group)
                     all_sprites.add(player, layer=2)
                     player.groups = player.groups()
+                
+                elif level[y][x] == 's':
+                    snail = Snail((x, y - 0.70), enemy_group)
+                    all_sprites.add(snail, layer=2)         
+                
+                
         print(spawnpoint, fire_group)
         left, right, up = False, False, False
         actions_list = [left, right, up]
@@ -148,8 +153,6 @@ class Main:
                 if event.type == pygame.KEYDOWN:
                     if event.key in DCT_FOR_MOVING_PLAYER.keys():
                         actions_list[DCT_FOR_MOVING_PLAYER[event.key]] = True
-                    elif event.key == pygame.K_SPACE:
-                        player.shoot(bullet_group, all_sprites)
                                 
                 if event.type == pygame.KEYUP:
                     if event.key in DCT_FOR_MOVING_PLAYER.keys():
@@ -157,9 +160,10 @@ class Main:
                                    
             player.update(*actions_list, platforms_group, fire_group,
                           spawnpoint)
+            for enemy in enemy_group:
+                enemy.move()
             #player.update(*actions_list, platforms_group)
             # Возвращение экрана к дефолту
-            bullet_group.update(enemies_group,platforms_group)
             self.screen.fill((0, 0, 0))
             camera.update(player)
             for group in groups_to_update_with_camera:
@@ -209,7 +213,8 @@ class Camera:
             self.word_up = True 
         if target.rect.y <= 0:
             self.word_down = True            
-
+            
+    
 
 if __name__ == '__main__':
     SCREEN_WIDTH = 1250
