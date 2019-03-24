@@ -107,8 +107,11 @@ class Main:
         platforms_group = pygame.sprite.Group()
         stairs_group = pygame.sprite.Group()
         fire_group = pygame.sprite.Group()
+        bullet_group = pygame.sprite.Group()
+        enemies_group = pygame.sprite.Group()
         groups_to_update_with_camera = [player_group, platforms_group,
-                                        stairs_group, fire_group]
+                                        stairs_group, fire_group,
+                                        bullet_group,enemies_group]
         
         bck = Background(background_group)
         all_sprites.add(bck, layer=-1)
@@ -145,6 +148,8 @@ class Main:
                 if event.type == pygame.KEYDOWN:
                     if event.key in DCT_FOR_MOVING_PLAYER.keys():
                         actions_list[DCT_FOR_MOVING_PLAYER[event.key]] = True
+                    elif event.key == pygame.K_SPACE:
+                        player.shoot(bullet_group, all_sprites)
                                 
                 if event.type == pygame.KEYUP:
                     if event.key in DCT_FOR_MOVING_PLAYER.keys():
@@ -154,6 +159,7 @@ class Main:
                           spawnpoint)
             #player.update(*actions_list, platforms_group)
             # Возвращение экрана к дефолту
+            bullet_group.update(enemies_group,platforms_group)
             self.screen.fill((0, 0, 0))
             camera.update(player)
             for group in groups_to_update_with_camera:
@@ -203,8 +209,7 @@ class Camera:
             self.word_up = True 
         if target.rect.y <= 0:
             self.word_down = True            
-            
-    
+
 
 if __name__ == '__main__':
     SCREEN_WIDTH = 1250

@@ -1,5 +1,7 @@
-from other_sprites import Tile
+from other_sprites import TILE_HEIGHT, TILE_WIDTH
 import pygame
+from helping_functions import load_image
+from other_sprites import Bullet
 
 PLAYER_IMAGE_FILENAME = 'player.png'
 PLAYER_MOVEMENT_SPEED = 1 / 6
@@ -7,9 +9,16 @@ JUMP_POWER = 10
 GRAVITY = 0.3
 climbing_speed = 5
 
-class Player(Tile):
+
+class Player(pygame.sprite.Sprite):
+    running_left_image = load_image(PLAYER_IMAGE_FILENAME, color_key=-2)
+    running_right_image = pygame.transform.flip(running_left_image, True, False)
+
     def __init__(self, pos, *groups):
-        super().__init__(pos, PLAYER_IMAGE_FILENAME, -2, *groups)
+        super().__init__(*groups)
+        self.image = Player.running_right_image
+        self.rect = self.image.get_rect().move(TILE_WIDTH * pos[0], TILE_HEIGHT * pos[1])
+        self.mask = pygame.mask.from_surface(self.image)
         self.x_velocity = 0
         self.y_velocity = 0
         self.falling_speed = GRAVITY
@@ -27,7 +36,7 @@ class Player(Tile):
             super().kill()
             self.x_velocity = 0
             self.y_velocity = 0
-            super().move(spawnpoint)
+            self.move(spawnpoint)
             self.stay_not_alive -= 1
             return None
         elif self.stay_not_alive == 1:
@@ -69,6 +78,10 @@ class Player(Tile):
         self.rect.y += self.y_velocity
         
         self.collide(0, self.y_velocity, group_of_platforms)
+        if self.x_velocity > 0:
+            self.image = Player.running_right_image
+        elif self.x_velocity < 0:
+            self.image = Player.running_left_image
 
     def collide(self, x_velocity, y_velocity, platforms):
         for p in platforms:
@@ -93,3 +106,14 @@ class Player(Tile):
 
     def groups(self):
         return super().groups()
+
+    def shoot(self, bullet_group, all_sprites):
+        if self.image == Player.running_right_image:
+            blt = Bullet(self.rect.midright, 1, bullet_group)
+            all_sprites.add(blt, layer=3)
+        else:
+            blt = Bullet(self.rect.midleft, -1, bullet_group)
+            all_sprites.add(blt, layer=3)
+
+    def move(self, pos):
+        self.rect.topleft = (TILE_WIDTH*pos[0], TILE_HEIGHT*pos[1])
