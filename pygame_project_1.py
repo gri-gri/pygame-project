@@ -17,9 +17,9 @@ def load_level(filename):
 
 
 def terminate():
-    # ÐŸÐ¾Ð·Ð¶Ðµ Ð¼Ð¾Ð¶Ð½Ð¾ Ð´Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ ÐºÐ°ÐºÐ¾Ðµ-Ð»Ð¸Ð±Ð¾ ÑÐ¾Ñ…Ñ€Ð°Ð½ÐµÐ½Ð¸Ðµ Ð¿Ñ€Ð¾Ð³Ñ€ÐµÑÑÐ° Ð² Ð¸Ð³Ñ€Ðµ, Ð¿Ð¾ÐºÐ° Ñ‚Ð°Ðº
-    # ÐÐ°Ð´Ð¾ Ð±ÑƒÐ´ÐµÑ‚ Ð¿Ð¾Ñ‚Ð¾Ð¼ Ñ€Ð°Ð·Ð»Ð¸Ñ‡Ð°Ñ‚ÑŒ Ð²Ñ‹Ñ…Ð¾Ð´ Ð¸Ð· ÑƒÑ€Ð¾Ð²Ð½Ñ Ð² Ð³Ð»Ð°Ð²Ð½Ð¾Ðµ Ð¼ÐµÐ½ÑŽ Ð¸Ð· Ð¸Ð³Ñ€Ñ‹ Ð¸ Ð²Ñ‹Ñ…Ð¾Ð´ Ð¸Ð· Ð¿Ñ€Ð¾Ð³Ñ€Ð°Ð¼Ð¼Ñ‹ Ð¸Ð· Ð¸Ð³Ñ€Ñ‹
-    # ÐÐ¾ Ð¿Ð¾ÐºÐ° Ð±ÑƒÐ´ÐµÑ‚ Ñ‚Ð¾Ð»ÑŒÐºÐ¾ Ð²Ñ‹Ñ…Ð¾Ð´ ÑÑ€Ð°Ð·Ñƒ Ð¸Ð· Ð¿Ñ€Ð¾Ð³Ñ€Ð°Ð¼Ð¼Ñ‹ Ð±ÐµÐ· ÑÐ¾Ñ…Ñ€Ð°Ð½ÐµÐ½Ð¸Ñ))
+    # Ïîçæå ìîæíî äîáàâèòü êàêîå-ëèáî ñîõðàíåíèå ïðîãðåññà â èãðå, ïîêà òàê
+    # Íàäî áóäåò ïîòîì ðàçëè÷àòü âûõîä èç óðîâíÿ â ãëàâíîå ìåíþ èç èãðû è âûõîä èç ïðîãðàììû èç èãðû
+    # Íî ïîêà áóäåò òîëüêî âûõîä ñðàçó èç ïðîãðàììû áåç ñîõðàíåíèÿ))
     try:
         pygame.quit()
     except Exception:
@@ -33,20 +33,20 @@ class Main:
         self.height = SCREEN_HEIGHT
         self.size = (self.width, self.height)
         self.screen = pygame.display.set_mode(self.size)
-        self.fps = FPS  # ÐÐµ ÑƒÐ²ÐµÑ€ÐµÐ½, Ð¼Ð¾Ð¶ÐµÑ‚ Ð±Ñ‹Ñ‚ÑŒ Ð´Ð¸Ð½Ð°Ð¼Ð¸Ñ‡ÐµÑÐºÐ¸Ð¼
+        self.fps = FPS  # Íå óâåðåí, ìîæåò áûòü äèíàìè÷åñêèì
         self.clock = pygame.time.Clock()
 
-        # Ð—Ð´ÐµÑÑŒ Ð¸Ð´Ñ‘Ñ‚ Ð·Ð°ÑÑ‚Ð°Ð²ÐºÐ° Ð¸/Ð¸Ð»Ð¸ Ð²Ñ‹Ð±Ð¾Ñ€ ÑƒÑ€Ð¾Ð²Ð½Ñ(Ð´Ð¾Ð´ÐµÐ»Ñ‹Ð²Ð°ÐµÑ‚ÑÑ Ð¿Ð¾Ñ‚Ð¾Ð¼, ÑÐ¿ÐµÑ€Ð²Ð° Ð±ÑƒÐ´ÐµÑ‚ Ñ‚Ð¾Ð»ÑŒÐºÐ¾ Ð·Ð°ÑÑ‚Ð°Ð²ÐºÐ° Ð¸ Ð¾Ð´Ð¸Ð½ ÑƒÑ€Ð¾Ð²ÐµÐ½ÑŒ)
+        # Çäåñü èä¸ò çàñòàâêà è/èëè âûáîð óðîâíÿ(äîäåëûâàåòñÿ ïîòîì, ñïåðâà áóäåò òîëüêî çàñòàâêà è îäèí óðîâåíü)
         if self.start_screen():
 
-            # Ð—Ð´ÐµÑÑŒ Ð½Ð°Ñ‡Ð¸Ð½Ð°ÐµÑ‚ÑÑ, ÑÐ¾Ð±ÑÑ‚Ð²ÐµÐ½Ð½Ð¾, ÑÐ°Ð¼ ÑƒÑ€Ð¾Ð²ÐµÐ½ÑŒ, Ñ‚Ð°Ðº ÐºÐ°Ðº Ð¾Ð½ Ð¿Ð¾ÐºÐ° Ð¾Ð´Ð¸Ð½
+            # Çäåñü íà÷èíàåòñÿ, ñîáñòâåííî, ñàì óðîâåíü, òàê êàê îí ïîêà îäèí
             self.start_game()
 
-            # Ð—Ð´ÐµÑÑŒ, Ñ‚Ð°Ðº ÐºÐ°Ðº Ð¿Ð¾ÐºÐ° Ð¾Ð´Ð¸Ð½ ÑƒÑ€Ð¾Ð²ÐµÐ½ÑŒ, Ð±ÑƒÐ´ÐµÑ‚ Ð¿Ñ€Ð¾ÑÑ‚Ð¾ ÑÐºÑ€Ð°Ð½ ÐºÐ¾Ð½Ñ†Ð° Ð¸Ð³Ñ€Ñ‹
+            # Çäåñü, òàê êàê ïîêà îäèí óðîâåíü, áóäåò ïðîñòî ýêðàí êîíöà èãðû
             self.end_screen()
 
     def start_screen(self):
-        intro_text = ["Ð—ÐÐ¡Ð¢ÐÐ’ÐšÐ", "", "ÐŸÑ€Ð°Ð²Ð¸Ð»Ð° Ð¸Ð³Ñ€Ñ‹", "", "True"]
+        intro_text = ["ÇÀÑÒÀÂÊÀ", "", "Ïðàâèëà èãðû", "", "True"]
  
         background = pygame.transform.scale(load_image(START_BACKGROUND_FILENAME), (self.width, self.height))
         self.screen.blit(background, (0, 0))
@@ -72,8 +72,8 @@ class Main:
             self.clock.tick(10)
 
     def end_screen(self):
-        end_text = ["ÐšÐ¾Ð½ÐµÑ†",
-                    "ÐÐ°Ð¶Ð¼Ð¸Ñ‚Ðµ Ð»ÑŽÐ±ÑƒÑŽ ÐºÐ½Ð¾Ð¿ÐºÑƒ,", "Ñ‡Ñ‚Ð¾Ð±Ñ‹ Ð²Ñ‹Ð¹Ñ‚Ð¸"]
+        end_text = ["Êîíåö",
+                    "Íàæìèòå ëþáóþ êíîïêó,", "÷òîáû âûéòè"]
 
         background = pygame.transform.scale(load_image(END_BACKGROUND_FILENAME), (self.width, self.height))
         self.screen.blit(background, (0, 0))
@@ -97,19 +97,18 @@ class Main:
             self.clock.tick(10)
 
     def start_game(self):
-        # Ð—Ð´ÐµÑÑŒ Ð´Ð¾Ð»Ð¶Ð½Ð¾ Ð¸Ð´Ñ‚Ð¸ Ñ‡Ñ‚Ð¾-Ñ‚Ð¾ Ð²Ñ€Ð¾Ð´Ðµ Ð·Ð°Ð³Ñ€ÑƒÐ·ÐºÐ¸ ÐºÐ°Ñ€Ñ‚Ñ‹, Ñ€Ð°ÑÑÑ‚Ð°Ð²Ð»ÐµÐ½Ð¸Ðµ Ð²Ñ€Ð°Ð³Ð¾Ð² Ð¸ Ñ‚Ð°Ðº Ð´Ð°Ð»ÐµÐµ
-        # Ð”Ñ€ÑƒÐ³Ð¸Ð¼Ð¸ ÑÐ»Ð¾Ð²Ð°Ð¼Ð¸, Ñ‚Ð¾, Ñ‡Ñ‚Ð¾ Ð½ÑƒÐ¶Ð½Ð¾ Ð´Ð»Ñ ÐºÐ°Ð¶Ð´Ð¾Ð³Ð¾ Ð¾Ñ‚Ð´ÐµÐ»ÑŒÐ½Ð¾ ÑƒÑ€Ð¾Ð²Ð½Ñ
+        # Çäåñü äîëæíî èäòè ÷òî-òî âðîäå çàãðóçêè êàðòû, ðàññòàâëåíèå âðàãîâ è òàê äàëåå
+        # Äðóãèìè ñëîâàìè, òî, ÷òî íóæíî äëÿ êàæäîãî îòäåëüíî óðîâíÿ
 
-        # Ð—Ð´ÐµÑÑŒ Ð¿Ð¾Ð´ÑŠÐµÑ…Ð°Ð»Ð° Ñ„Ð¸Ð³Ð½Ñ ÑÐ¾ ÑÐ¿Ñ€Ð°Ð¹Ñ‚Ð°Ð¼Ð¸
+        # Çäåñü ïîäúåõàëà ôèãíÿ ñî ñïðàéòàìè
         background_group = pygame.sprite.Group()
+        bullet_group = pygame.sprite.Group()
         all_sprites = pygame.sprite.LayeredUpdates()        
         player_group = pygame.sprite.GroupSingle()
         platforms_group = pygame.sprite.Group()
-        stairs_group = pygame.sprite.Group()
         fire_group = pygame.sprite.Group()
         enemy_group = pygame.sprite.Group()
-        groups_to_update_with_camera = [player_group, platforms_group,
-                                        stairs_group, fire_group, enemy_group]
+        groups_to_update_with_camera = [player_group, platforms_group, bullet_group, fire_group, enemy_group]
         
         bck = Background(background_group)
         all_sprites.add(bck, layer=-1)
@@ -153,22 +152,30 @@ class Main:
                 if event.type == pygame.KEYDOWN:
                     if event.key in DCT_FOR_MOVING_PLAYER.keys():
                         actions_list[DCT_FOR_MOVING_PLAYER[event.key]] = True
+                    elif event.key == pygame.K_SPACE:
+                        player.shoot(bullet_group, all_sprites)
                                 
                 if event.type == pygame.KEYUP:
                     if event.key in DCT_FOR_MOVING_PLAYER.keys():
                         actions_list[DCT_FOR_MOVING_PLAYER[event.key]] = False
                                    
-            player.update(*actions_list, platforms_group, fire_group,
+            player.update(*actions_list, platforms_group, [fire_group, 
+                                                           enemy_group],
                           spawnpoint)
+            
             for enemy in enemy_group:
                 enemy.move()
-            #player.update(*actions_list, platforms_group)
-            # Ð’Ð¾Ð·Ð²Ñ€Ð°Ñ‰ÐµÐ½Ð¸Ðµ ÑÐºÑ€Ð°Ð½Ð° Ðº Ð´ÐµÑ„Ð¾Ð»Ñ‚Ñƒ
+                
             self.screen.fill((0, 0, 0))
             camera.update(player)
+            
+            for bullet in bullet_group:
+                bullet.update(enemy_group, platforms_group)
+                
             for group in groups_to_update_with_camera:
                 for sprite in group:
                     camera.apply(sprite)
+           
             camera.word_r, camera.word_l = False, False
             camera.word_up, camera.word_down = False, False
             
@@ -187,14 +194,17 @@ class Background(pygame.sprite.Sprite):
         
 class Camera:
     def __init__(self):
+        self.iftr = False
         self.dx = SCREEN_WIDTH
         self.dy = SCREEN_HEIGHT
         self.word_r = False
-        self.word_l = False
+        self.word_l  = False
         self.word_up = False
         self.word_down = False
-
+        self.trans = self.tr_r, self.tr_l, self.tr_u, self.tr_d = 0, 0, 0, 0
+        
     def apply(self, obj):
+        
         if self.word_r:
             obj.rect.x -= self.dx
         if self.word_l:
@@ -207,18 +217,28 @@ class Camera:
     def update(self, target):
         if target.rect.x >= SCREEN_WIDTH:
             self.word_r = True
+            self.tr_r += 1
         if target.rect.x <= 0:
-            self.word_l = True      
+            self.word_l = True
+            self.tr_l += 1
         if target.rect.y >= SCREEN_HEIGHT:
-            self.word_up = True 
+            self.word_up = True
+            self.tr_u += 1
         if target.rect.y <= 0:
-            self.word_down = True            
-            
+            self.word_down = True
+            self.tr_d += 1
+    '''
+    def return_to_spawn(self, target):
+        self.iftr = True
+        for i in self.trans[0]:
+            target.rect.x.move()
+        self.iftr = False
+    '''
     
 
 if __name__ == '__main__':
-    SCREEN_WIDTH = 1250
-    SCREEN_HEIGHT = 1000
+    SCREEN_WIDTH = 1200
+    SCREEN_HEIGHT = 800
     FPS = 60
     START_BACKGROUND_FILENAME = 'start_background.png'
     END_BACKGROUND_FILENAME = 'end_background.png'
