@@ -31,6 +31,19 @@ class Fire(Tile):
     def __init__(self, pos, *groups):
         super().__init__(pos, 'fire.png', -2, *groups) 
 
+class Checkpoint_Tile(Tile):
+    def __init__(self, pos, *groups):
+        super().__init__(pos, 'flag.png', -2, *groups)
+        self.image =  pygame.transform.scale(load_image('flag.png', color_key=-1), (46, 200))
+        self.name = 'not_checked'
+        
+    def collided(self, ifcollided):
+        if ifcollided:
+            self.image = pygame.transform.scale(load_image('flag_appear.png', color_key=-1), (80, 300))
+            self.name = 'checked'
+            self.rect.y -= 100
+            self.rect.x -= 30
+        
 
 class Snail(Tile):
     def __init__(self, pos, *groups):

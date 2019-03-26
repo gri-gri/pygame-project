@@ -30,17 +30,19 @@ class Player(pygame.sprite.Sprite):
         self.stair_coll = False
         self.jump_sec = 0
         self.stay_not_alive = 0
+        self.spawnpoint = pos
 
     def update(self, left, right, up, group_of_platforms,
-               enemies_group_cont, spawnpoint):
+               enemies_group_cont, spawnpoint, check_group):
         if self.stay_not_alive > 30:
             self.stay_not_alive -= 1
             return None
         if self.stay_not_alive > 1:
             super().kill()
+            self.spawnpoint = spawnpoint
             self.x_velocity = 0
             self.y_velocity = 0
-            self.move(spawnpoint)
+            self.move(self.spawnpoint)
             self.stay_not_alive -= 1
             return None
         elif self.stay_not_alive == 1:
@@ -67,6 +69,7 @@ class Player(pygame.sprite.Sprite):
         self.collide(self.x_velocity, 0, group_of_platforms)
         if self.collide_enemies(enemies_group_cont):
             self.stay_not_alive = 40
+        self.collide_checkpoint(check_group)
 
         if up:
             if self.onGround:
@@ -108,6 +111,12 @@ class Player(pygame.sprite.Sprite):
                                               collided=pygame.sprite.collide_mask):
                 return True
         return False
+    
+    def collide_checkpoint(self, check_group):
+        for save in check_group:
+            if pygame.sprite.collide_rect(self, save) and save.name != 'checked':
+                save.collided(True)
+                self.spawnpoint = save.pos
 
     def groups(self):
         return super().groups()
