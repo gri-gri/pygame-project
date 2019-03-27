@@ -5,7 +5,8 @@ from other_sprites import *
 from helping_functions import *
 from player import *
 
-
+SCREEN_WIDTH = 1250
+SCREEN_HEIGHT = 850
 SYMB_FOR_SPARE_PLACE_IN_LEVEl_FILE = '.'
 
 def load_level(filename):
@@ -98,7 +99,6 @@ class Main:
     def start_game(self):
         # Здесь должно идти что-то вроде загрузки карты, расставление врагов и так далее
         # Другими словами, то, что нужно для каждого отдельно уровня
-
         # Здесь подъехала фигня со спрайтами
         background_group = pygame.sprite.Group()
         all_sprites = pygame.sprite.LayeredUpdates()        
@@ -145,7 +145,6 @@ class Main:
                     checkpoint = Checkpoint_Tile((x, y - 2.99), save_group)
                     all_sprites.add(checkpoint, layer=1)                
                 
-                
 
         left, right, up = False, False, False
         actions_list = [left, right, up]
@@ -165,8 +164,6 @@ class Main:
                     if event.key in DCT_FOR_MOVING_PLAYER.keys():
                         actions_list[DCT_FOR_MOVING_PLAYER[event.key]] = False
                                    
-            player.update(*actions_list, platforms_group, [fire_group, enemy_group],
-                          spawnpoint, save_group)
             for enemy in enemy_group:
                 enemy.move()
             #player.update(*actions_list, platforms_group)
@@ -182,7 +179,9 @@ class Main:
                     camera.apply(sprite)
             camera.word_r, camera.word_l = False, False
             camera.word_up, camera.word_down = False, False
-            
+            player.update(*actions_list, player_group, platforms_group, bullet_group, 
+                          [fire_group, enemy_group],
+                          spawnpoint, save_group)    
             all_sprites.draw(self.screen)
             
             pygame.display.flip()
@@ -218,18 +217,29 @@ class Camera:
     def update(self, target):
         if target.rect.x >= SCREEN_WIDTH:
             self.word_r = True
+            target.tr_r += 1
         if target.rect.x <= 0:
-            self.word_l = True      
+            self.word_l = True
+            target.tr_l += 1
         if target.rect.y >= SCREEN_HEIGHT:
-            self.word_up = True 
+            self.word_up = True
+            target.tr_up += 1
         if target.rect.y <= 0:
-            self.word_down = True            
-            
+            self.word_down = True
+            target.tr_down += 1
     
+    def special_apply(self, obj, r, l, up, down):
+        if r:
+            obj.rect.x -= self.dx
+        if l:
+            obj.rect.x += self.dx 
+        if up:
+            obj.rect.y += self.dy
+        if down:
+            obj.rect.y -= self.dy
+            
 
 if __name__ == '__main__':
-    SCREEN_WIDTH = 1250
-    SCREEN_HEIGHT = 1000
     FPS = 60
     START_BACKGROUND_FILENAME = 'start_background.png'
     END_BACKGROUND_FILENAME = 'end_background.png'

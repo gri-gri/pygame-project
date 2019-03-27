@@ -2,6 +2,7 @@ from other_sprites import TILE_HEIGHT, TILE_WIDTH
 import pygame
 from helping_functions import load_image
 from other_sprites import Bullet
+from pygame_project_1 import SCREEN_WIDTH, SCREEN_HEIGHT
 
 PLAYER_IMAGE_FILENAME = 'player.png'
 PLAYER_MOVEMENT_SPEED = 1 / 6
@@ -31,18 +32,20 @@ class Player(pygame.sprite.Sprite):
         self.jump_sec = 0
         self.stay_not_alive = 0
         self.spawnpoint = pos
+        self.tr_r, self.tr_l, self.tr_up, self.tr_down = 0, 0, 0, 0
 
-    def update(self, left, right, up, group_of_platforms,
+    def update(self, left, right, up, player_group, group_of_platforms, bullet_group,
                enemies_group_cont, spawnpoint, check_group):
+        groups_to_update_with_camera = [player_group, group_of_platforms, bullet_group,
+                                        *enemies_group_cont, check_group]
         if self.stay_not_alive > 30:
             self.stay_not_alive -= 1
             return None
         if self.stay_not_alive > 1:
-            super().kill()
-            self.spawnpoint = spawnpoint
+            super().kill() 
             self.x_velocity = 0
             self.y_velocity = 0
-            self.move(self.spawnpoint)
+            self.move(self.spawnpoint, groups_to_update_with_camera)
             self.stay_not_alive -= 1
             return None
         elif self.stay_not_alive == 1:
@@ -116,7 +119,8 @@ class Player(pygame.sprite.Sprite):
         for save in check_group:
             if pygame.sprite.collide_rect(self, save) and save.name != 'checked':
                 save.collided(True)
-                self.spawnpoint = save.pos
+                self.spawnpoint = (int(save.pos[0]), int(save.pos[1]))
+                print(self.spawnpoint)
 
     def groups(self):
         return super().groups()
@@ -129,5 +133,37 @@ class Player(pygame.sprite.Sprite):
             blt = Bullet(self.rect.midleft, -1, bullet_group)
             all_sprites.add(blt, layer=3)
 
-    def move(self, pos):
+    def move(self, pos, update_groups):
+        '''print(self.tr_r, self.tr_l, self.tr_up, self.tr_down)'''
+        
         self.rect.topleft = (TILE_WIDTH*pos[0], TILE_HEIGHT*pos[1])
+        '''if self.rect.topleft[0] > SCREEN_WIDTH:
+            for i in range(self.rect.topleft[0] // SCREEN_WIDTH):
+                for i in update_groups:
+                    for obj in i:
+                        camera.special_apply(obj, True, False, False, False)
+        if self.rect.topleft[1] > SCREEN_HEIGHT:
+            for i in range(self.rect.topleft[1] // SCREEN_HEIGHT):
+                for i in groups_to_update_with_camera:
+                    for obj in i:
+                        camera.special_apply(obj, False, False, True, False)'''
+        self.rect.topleft = (self.rect.topleft[0] % SCREEN_WIDTH, 
+                             self.rect.topleft[1] % SCREEN_HEIGHT)
+        
+        '''for i in range(self.tr_r):
+            for i in update_groups:
+                for obj in i:
+                    camera.special_apply(obj, False, True, False, False)  
+        for i in range(self.tr_l):
+            for i in update_groups:
+                for obj in i:
+                    camera.special_apply(obj, True, False, False, False)
+        for i in range(self.tr_up):
+            for i in update_groups:
+                for obj in i:
+                    camera.special_apply(obj, False, False, False, True)
+        for i in range(self.tr_down):
+            for i in update_groups:
+                for obj in i:
+                    camera.special_apply(obj, False, False, True, False)        
+        self.tr_r, self.tr_l, self.tr_up, self.tr_down = 0, 0, 0, 0      '''  

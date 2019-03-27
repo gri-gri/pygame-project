@@ -34,6 +34,7 @@ class Fire(Tile):
 class Checkpoint_Tile(Tile):
     def __init__(self, pos, *groups):
         super().__init__(pos, 'flag.png', -2, *groups)
+        self.pos = pos
         self.image =  pygame.transform.scale(load_image('flag.png', color_key=-1), (46, 200))
         self.name = 'not_checked'
         
