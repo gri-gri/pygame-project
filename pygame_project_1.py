@@ -1,6 +1,7 @@
 import os
 import sys
 import pygame
+#screen_width
 from other_sprites import *
 from helping_functions import *
 from player import *
@@ -50,16 +51,16 @@ class Main:
  
         background = pygame.transform.scale(load_image(START_BACKGROUND_FILENAME), (self.width, self.height))
         self.screen.blit(background, (0, 0))
-        font = pygame.font.Font(None, 30)
+        #font = pygame.font.Font(None, 30)
         text_coord = 50
-        for line in intro_text:
+        '''for line in intro_text:
             string_rendered = font.render(line, 1, pygame.Color('black'))
             intro_rect = string_rendered.get_rect()
             text_coord += 10
             intro_rect.top = text_coord
             intro_rect.x = 10
             text_coord += intro_rect.height
-            self.screen.blit(string_rendered, intro_rect)
+            self.screen.blit(string_rendered, intro_rect)'''
      
         while True:
             for event in pygame.event.get():
@@ -77,16 +78,16 @@ class Main:
 
         background = pygame.transform.scale(load_image(END_BACKGROUND_FILENAME), (self.width, self.height))
         self.screen.blit(background, (0, 0))
-        font = pygame.font.Font(None, 20)
+        #font = pygame.font.Font(None, 20)
         text_coord = 200
-        for line in end_text:
+        '''for line in end_text:
             string_rendered = font.render(line, 1, pygame.Color('red'))
             intro_rect = string_rendered.get_rect()
             text_coord += 10
             intro_rect.top = text_coord
             intro_rect.x = 10
             text_coord += intro_rect.height
-            self.screen.blit(string_rendered, intro_rect)
+            self.screen.blit(string_rendered, intro_rect)'''
 
         while True:
             for event in pygame.event.get():
@@ -110,14 +111,14 @@ class Main:
         enemy_group = pygame.sprite.Group()
         save_group = pygame.sprite.Group()
         groups_to_update_with_camera = [player_group, platforms_group, bullet_group, fire_group, enemy_group, save_group] 
-        
+               
         bck = Background(background_group)
         all_sprites.add(bck, layer=-1)
 
         #level = load_level(LEVEL_FILENAME)
         level = load_level("level3.txt")
         player = checkpoint = None
-        camera = Camera()
+        camera = Camera(groups_to_update_with_camera)
         #print(len(level))
         for y in range(len(level)):
             for x in range(len(level[y])):
@@ -133,15 +134,19 @@ class Main:
                     start_checkpoint = Checkpoint_Tile((x, y), save_group)
                     player = Player((x, y), player_group)
                     all_sprites.add(player, layer=2)
-                    player.groups = player.groups()
+                    player.groups = player.groups()                
                 
                 elif level[y][x] == 's':
                     snail = Snail((x, y - 0.70), enemy_group)
-                    all_sprites.add(snail, layer=2)   
+                    all_sprites.add(snail, layer=2) 
+                    
+                elif level[y][x] == 'R':
+                    robot = Robot((x, y), enemy_group)
+                    all_sprites.add(robot, layer=2)                
                 
                 elif level[y][x] == 'S':
-                    cp = Checkpoint_Tile((x, y), save_group)
-                    all_sprites.add(cp, layer=1)                
+                    checkpoint = Checkpoint_Tile((x, y), save_group)
+                    all_sprites.add(checkpoint, layer=1)                
                 
 
         left, right, up = False, False, False
@@ -164,21 +169,26 @@ class Main:
                         actions_list[DCT_FOR_MOVING_PLAYER[event.key]] = False
                                    
             for enemy in enemy_group:
-                enemy.move()
+                if enemy.image_name != 'robot.png':
+                    enemy.move()
+                else:
+                    enemy.move(bullet_group, all_sprites)
+            # Возвращение экрана к дефолту
             self.screen.fill((0, 0, 0))
             camera.update(player)
             
             for bullet in bullet_group: 
-                bullet.update(enemy_group, platforms_group)           
+                bullet.update(enemy_group if bullet.flag_to_diff == 'enemy' else player, platforms_group, SCREEN_WIDTH)           
                             
             for group in groups_to_update_with_camera:
                 for sprite in group:
                     camera.apply(sprite)
             camera.word_r, camera.word_l = False, False
             camera.word_up, camera.word_down = False, False
-            checkpoint = player.update(*actions_list, player_group, platforms_group, bullet_group,
+            checkpoint = player.update(*actions_list, platforms_group, bullet_group,
                                        [fire_group, enemy_group],
-                                       checkpoint, save_group)    
+                                       checkpoint, save_group)                
+   
             all_sprites.draw(self.screen)
             
             pygame.display.flip()
@@ -193,7 +203,8 @@ class Background(pygame.sprite.Sprite):
         
         
 class Camera:
-    def __init__(self):
+    def __init__(self, update_group):
+        self.update_group = update_group
         self.dx = SCREEN_WIDTH
         self.dy = SCREEN_HEIGHT
         self.word_r = False
@@ -231,9 +242,9 @@ class Camera:
         if l:
             obj.rect.x += self.dx 
         if up:
-            obj.rect.y += self.dy
-        if down:
             obj.rect.y -= self.dy
+        if down:
+            obj.rect.y += self.dy
             
 
 if __name__ == '__main__':
