@@ -116,7 +116,7 @@ class Main:
 
         #level = load_level(LEVEL_FILENAME)
         level = load_level("level3.txt")
-        player = spawnpoint = None
+        player = checkpoint = None
         camera = Camera()
         #print(len(level))
         for y in range(len(level)):
@@ -130,24 +130,23 @@ class Main:
                     all_sprites.add(fire, layer=1)
                     
                 elif level[y][x] == SYMB_FOR_PLAYER_IN_LEVEL_FILE:
-                    start_level_point = (x, y)
-                    spawnpoint = (x, y)
+                    start_checkpoint = Checkpoint_Tile((x, y), save_group)
                     player = Player((x, y), player_group)
                     all_sprites.add(player, layer=2)
                     player.groups = player.groups()
-                    print(player.spawnpoint)
                 
                 elif level[y][x] == 's':
                     snail = Snail((x, y - 0.70), enemy_group)
                     all_sprites.add(snail, layer=2)   
                 
                 elif level[y][x] == 'S':
-                    checkpoint = Checkpoint_Tile((x, y - 2.99), save_group)
-                    all_sprites.add(checkpoint, layer=1)                
+                    cp = Checkpoint_Tile((x, y), save_group)
+                    all_sprites.add(cp, layer=1)                
                 
 
         left, right, up = False, False, False
         actions_list = [left, right, up]
+        checkpoint = start_checkpoint
         
         while True:
             for event in pygame.event.get():
@@ -166,8 +165,6 @@ class Main:
                                    
             for enemy in enemy_group:
                 enemy.move()
-            #player.update(*actions_list, platforms_group)
-            # Возвращение экрана к дефолту
             self.screen.fill((0, 0, 0))
             camera.update(player)
             
@@ -179,9 +176,9 @@ class Main:
                     camera.apply(sprite)
             camera.word_r, camera.word_l = False, False
             camera.word_up, camera.word_down = False, False
-            player.update(*actions_list, player_group, platforms_group, bullet_group, 
-                          [fire_group, enemy_group],
-                          spawnpoint, save_group)    
+            checkpoint = player.update(*actions_list, player_group, platforms_group, bullet_group,
+                                       [fire_group, enemy_group],
+                                       checkpoint, save_group)    
             all_sprites.draw(self.screen)
             
             pygame.display.flip()

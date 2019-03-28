@@ -31,26 +31,28 @@ class Player(pygame.sprite.Sprite):
         self.stair_coll = False
         self.jump_sec = 0
         self.stay_not_alive = 0
-        self.spawnpoint = pos
         self.tr_r, self.tr_l, self.tr_up, self.tr_down = 0, 0, 0, 0
 
     def update(self, left, right, up, player_group, group_of_platforms, bullet_group,
-               enemies_group_cont, spawnpoint, check_group):
-        groups_to_update_with_camera = [player_group, group_of_platforms, bullet_group,
-                                        *enemies_group_cont, check_group]
+               enemies_group_cont, checkpoint, check_group):
+        print(self.rect)
         if self.stay_not_alive > 30:
+            print(checkpoint.rect)
             self.stay_not_alive -= 1
-            return None
-        if self.stay_not_alive > 1:
-            super().kill() 
             self.x_velocity = 0
             self.y_velocity = 0
-            self.move(self.spawnpoint, groups_to_update_with_camera)
+            return checkpoint
+        if self.stay_not_alive > 1:
+            super().kill() 
+            self.move(checkpoint)
             self.stay_not_alive -= 1
-            return None
+            return checkpoint
         elif self.stay_not_alive == 1:
             super().add(self.groups)
+            self.x_velocity = 0
+            self.y_velocity = 0
             self.stay_not_alive -= 1
+            return checkpoint
         if left:
             if not self.onGround:
                 if self.x_velocity < 6:
@@ -72,7 +74,7 @@ class Player(pygame.sprite.Sprite):
         self.collide(self.x_velocity, 0, group_of_platforms)
         if self.collide_enemies(enemies_group_cont):
             self.stay_not_alive = 40
-        self.collide_checkpoint(check_group)
+        checkpoint = self.collide_checkpoint(check_group, checkpoint)
 
         if up:
             if self.onGround:
@@ -92,6 +94,7 @@ class Player(pygame.sprite.Sprite):
             self.image = Player.running_right_image
         elif self.x_velocity < 0:
             self.image = Player.running_left_image
+        return checkpoint
 
     def collide(self, x_velocity, y_velocity, platforms):
         for p in platforms:
@@ -115,12 +118,12 @@ class Player(pygame.sprite.Sprite):
                 return True
         return False
     
-    def collide_checkpoint(self, check_group):
+    def collide_checkpoint(self, check_group, checkpoint):
         for save in check_group:
             if pygame.sprite.collide_rect(self, save) and save.name != 'checked':
-                save.collided(True)
-                self.spawnpoint = (int(save.pos[0]), int(save.pos[1]))
-                print(self.spawnpoint)
+                save.collided()
+                checkpoint = save
+        return checkpoint
 
     def groups(self):
         return super().groups()
@@ -133,37 +136,8 @@ class Player(pygame.sprite.Sprite):
             blt = Bullet(self.rect.midleft, -1, bullet_group)
             all_sprites.add(blt, layer=3)
 
-    def move(self, pos, update_groups):
-        '''print(self.tr_r, self.tr_l, self.tr_up, self.tr_down)'''
-        
-        self.rect.topleft = (TILE_WIDTH*pos[0], TILE_HEIGHT*pos[1])
-        '''if self.rect.topleft[0] > SCREEN_WIDTH:
-            for i in range(self.rect.topleft[0] // SCREEN_WIDTH):
-                for i in update_groups:
-                    for obj in i:
-                        camera.special_apply(obj, True, False, False, False)
-        if self.rect.topleft[1] > SCREEN_HEIGHT:
-            for i in range(self.rect.topleft[1] // SCREEN_HEIGHT):
-                for i in groups_to_update_with_camera:
-                    for obj in i:
-                        camera.special_apply(obj, False, False, True, False)'''
-        self.rect.topleft = (self.rect.topleft[0] % SCREEN_WIDTH, 
-                             self.rect.topleft[1] % SCREEN_HEIGHT)
-        
-        '''for i in range(self.tr_r):
-            for i in update_groups:
-                for obj in i:
-                    camera.special_apply(obj, False, True, False, False)  
-        for i in range(self.tr_l):
-            for i in update_groups:
-                for obj in i:
-                    camera.special_apply(obj, True, False, False, False)
-        for i in range(self.tr_up):
-            for i in update_groups:
-                for obj in i:
-                    camera.special_apply(obj, False, False, False, True)
-        for i in range(self.tr_down):
-            for i in update_groups:
-                for obj in i:
-                    camera.special_apply(obj, False, False, True, False)        
-        self.tr_r, self.tr_l, self.tr_up, self.tr_down = 0, 0, 0, 0      '''  
+    def move(self, spawnpoint):
+        self.rect.center = spawnpoint.rect.center
+        print('moved player rect {}'.format(self.rect))
+        # self.rect.topleft = (self.rect.topleft[0] % SCREEN_WIDTH, 
+        #               self.rect.topleft[1] % SCREEN_HEIGHT) 

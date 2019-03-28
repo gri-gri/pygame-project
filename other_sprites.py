@@ -22,7 +22,6 @@ class Tile(pygame.sprite.Sprite):
     def groups(self):
         return super().groups()    
 
-
 class Platform(Tile):
     def __init__(self, pos, *groups):
         super().__init__(pos, 'platform.png', -2, *groups)
@@ -35,16 +34,19 @@ class Checkpoint_Tile(Tile):
     def __init__(self, pos, *groups):
         super().__init__(pos, 'flag.png', -2, *groups)
         self.pos = pos
-        self.image =  pygame.transform.scale(load_image('flag.png', color_key=-1), (46, 200))
+        self.image = pygame.transform.scale(self.image, (30, 50))
+        self.rect = self.image.get_rect().move(TILE_WIDTH*pos[0], TILE_HEIGHT*pos[1])
         self.name = 'not_checked'
         
-    def collided(self, ifcollided):
-        if ifcollided:
-            self.image = pygame.transform.scale(load_image('flag_appear.png', color_key=-1), (80, 300))
-            self.name = 'checked'
-            self.rect.y -= 100
-            self.rect.x -= 30
-        
+    def collided(self):
+        self.image = pygame.transform.scale(load_image('flag_appear.png', color_key=-2), (30, 50))
+        '''
+        self.image = pygame.transform.scale(load_image('flag_appear.png', color_key=-2), (50, 50))
+        print(True, self.image.get_rect(), self.pos)
+        self.rect = self.image.get_rect().move(TILE_WIDTH*self.pos[0], TILE_HEIGHT*self.pos[1])
+        print('checkpoint retoken {}'.format(self.rect))
+        '''
+        self.name = 'checked'
 
 class Snail(Tile):
     def __init__(self, pos, *groups):
