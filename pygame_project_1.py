@@ -5,6 +5,7 @@ import pygame
 from other_sprites import *
 from helping_functions import *
 from player import *
+from time import sleep
 
 SCREEN_WIDTH = 1250
 SCREEN_HEIGHT = 850
@@ -24,6 +25,7 @@ def terminate():
     # Но пока будет только выход сразу из программы без сохранения))
     try:
         pygame.quit()
+        sys.exit()
     except Exception:
         pass
     
@@ -41,26 +43,25 @@ class Main:
         # Здесь идёт заставка и/или выбор уровня(доделывается потом, сперва будет только заставка и один уровень)
         if self.start_screen():
             # Здесь начинается, собственно, сам уровень, так как он пока один
-            self.start_game()
-
-            # Здесь, так как пока один уровень, будет просто экран конца игры
-            self.end_screen()
+            if self.start_game():
+                # Здесь, так как пока один уровень, будет просто экран конца игры
+                self.end_screen()
 
     def start_screen(self):
         intro_text = ["ЗАСТАВКА", "", "Правила игры", "", "True"]
  
         background = pygame.transform.scale(load_image(START_BACKGROUND_FILENAME), (self.width, self.height))
         self.screen.blit(background, (0, 0))
-        #font = pygame.font.Font(None, 30)
+        font = pygame.font.Font(None, 30)
         text_coord = 50
-        '''for line in intro_text:
+        for line in intro_text:
             string_rendered = font.render(line, 1, pygame.Color('black'))
             intro_rect = string_rendered.get_rect()
             text_coord += 10
             intro_rect.top = text_coord
             intro_rect.x = 10
             text_coord += intro_rect.height
-            self.screen.blit(string_rendered, intro_rect)'''
+            self.screen.blit(string_rendered, intro_rect)
      
         while True:
             for event in pygame.event.get():
@@ -73,21 +74,21 @@ class Main:
             self.clock.tick(10)
 
     def end_screen(self):
-        end_text = ["Конец",
+        end_text = ["Конец", 'Вы победили',
                     "Нажмите любую кнопку,", "чтобы выйти"]
 
         background = pygame.transform.scale(load_image(END_BACKGROUND_FILENAME), (self.width, self.height))
         self.screen.blit(background, (0, 0))
-        #font = pygame.font.Font(None, 20)
+        font = pygame.font.Font(None, 20)
         text_coord = 200
-        '''for line in end_text:
+        for line in end_text:
             string_rendered = font.render(line, 1, pygame.Color('red'))
             intro_rect = string_rendered.get_rect()
             text_coord += 10
             intro_rect.top = text_coord
             intro_rect.x = 10
             text_coord += intro_rect.height
-            self.screen.blit(string_rendered, intro_rect)'''
+            self.screen.blit(string_rendered, intro_rect)
 
         while True:
             for event in pygame.event.get():
@@ -110,16 +111,16 @@ class Main:
         fire_group = pygame.sprite.Group()
         enemy_group = pygame.sprite.Group()
         save_group = pygame.sprite.Group()
-        groups_to_update_with_camera = [player_group, platforms_group, bullet_group, fire_group, enemy_group, save_group] 
+        end_group = pygame.sprite.Group()
+        boss_group = pygame.sprite.Group()
+        groups_to_update_with_camera = [player_group, platforms_group, bullet_group, fire_group, enemy_group, save_group, end_group, boss_group] 
                
         bck = Background(background_group)
         all_sprites.add(bck, layer=-1)
 
-        #level = load_level(LEVEL_FILENAME)
-        level = load_level("level3.txt")
-        player = checkpoint = None
+        level = load_level("level4.txt")
+        player = checkpoint = start_checkpoint = None
         camera = Camera(groups_to_update_with_camera)
-        #print(len(level))
         for y in range(len(level)):
             for x in range(len(level[y])):
                 if level[y][x] == SYMB_FOR_PLATFORM_IN_LEVEL_FILE:
@@ -146,8 +147,15 @@ class Main:
                 
                 elif level[y][x] == 'S':
                     checkpoint = Checkpoint_Tile((x, y), save_group)
-                    all_sprites.add(checkpoint, layer=1)                
-                
+                    all_sprites.add(checkpoint, layer=1)
+
+                elif level[y][x] == 'E':
+                    end = End_tile((x, y), end_group)
+                    all_sprites.add(end, layer=2)
+
+                elif level[y][x] == 'B':
+                    bss = Boss((x, y), boss_group)
+                    all_sprites.add(bss, layer=2)
 
         left, right, up = False, False, False
         actions_list = [left, right, up]
@@ -176,17 +184,21 @@ class Main:
             # Возвращение экрана к дефолту
             self.screen.fill((0, 0, 0))
             camera.update(player)
-            
+            for boss in boss_group:
+                boss.update(player, bullet_group, all_sprites)
             for bullet in bullet_group: 
                 bullet.update(enemy_group if bullet.flag_to_diff == 'enemy' else player, platforms_group, SCREEN_WIDTH)           
-                            
+            for end in end_group:
+                if end.update(player):
+                    sleep(1)
+                    return True
             for group in groups_to_update_with_camera:
                 for sprite in group:
                     camera.apply(sprite)
             camera.word_r, camera.word_l = False, False
             camera.word_up, camera.word_down = False, False
             checkpoint = player.update(*actions_list, platforms_group, bullet_group,
-                                       [fire_group, enemy_group],
+                                       [fire_group, enemy_group, boss_group],
                                        checkpoint, save_group)                
    
             all_sprites.draw(self.screen)

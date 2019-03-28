@@ -11,7 +11,7 @@ GRAVITY = 0.3
 climbing_speed = 5
 pygame.init()
 pygame.display.set_mode((1, 1))
-running_left_image = load_image(PLAYER_IMAGE_FILENAME, color_key=-1)
+running_left_image = load_image(PLAYER_IMAGE_FILENAME, color_key=-2)
 running_right_image = pygame.transform.flip(running_left_image, True, False)
 pygame.quit()
 
@@ -37,7 +37,6 @@ class Player(pygame.sprite.Sprite):
     def update(self, left, right, up, group_of_platforms, bullet_group,
                enemies_group_cont, checkpoint, check_group):
         if self.stay_not_alive > 30:
-                    print(checkpoint.rect)
                     self.stay_not_alive -= 1
                     self.x_velocity = 0
                     self.y_velocity = 0
@@ -142,4 +141,3 @@ class Player(pygame.sprite.Sprite):
 
     def move(self, spawnpoint):        
         self.rect.center = spawnpoint.rect.center
-        print('moved player rect {}'.format(self.rect))        
