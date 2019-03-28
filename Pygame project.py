@@ -17,9 +17,10 @@ def load_level(filename):
 
 
 def terminate():
-    # РџРѕР·Р¶Рµ РјРѕР¶РЅРѕ РґРѕР±Р°РІРёС‚СЊ РєР°РєРѕРµ-Р»РёР±Рѕ СЃРѕС…СЂР°РЅРµРЅРёРµ РїСЂРѕРіСЂРµСЃСЃР° РІ РёРіСЂРµ, РїРѕРєР° С‚Р°Рє
-    # РќР°РґРѕ Р±СѓРґРµС‚ РїРѕС‚РѕРј СЂР°Р·Р»РёС‡Р°С‚СЊ РІС‹С…РѕРґ РёР· СѓСЂРѕРІРЅСЏ РІ РіР»Р°РІРЅРѕРµ РјРµРЅСЋ РёР· РёРіСЂС‹ Рё РІС‹С…РѕРґ РёР· РїСЂРѕРіСЂР°РјРјС‹ РёР· РёРіСЂС‹
-    # РќРѕ РїРѕРєР° Р±СѓРґРµС‚ С‚РѕР»СЊРєРѕ РІС‹С…РѕРґ СЃСЂР°Р·Сѓ РёР· РїСЂРѕРіСЂР°РјРјС‹ Р±РµР· СЃРѕС…СЂР°РЅРµРЅРёСЏ))
+    
+    # Позже можно добавить какое-либо сохранение прогресса в игре, пока так
+    # Надо будет потом различать выход из уровня в главное меню из игры и выход из программы из игры
+    # Но пока будет только выход сразу из программы без сохранения))
     try:
         pygame.quit()
     except Exception:
@@ -33,20 +34,20 @@ class Main:
         self.height = SCREEN_HEIGHT
         self.size = (self.width, self.height)
         self.screen = pygame.display.set_mode(self.size)
-        self.fps = FPS  # РќРµ СѓРІРµСЂРµРЅ, РјРѕР¶РµС‚ Р±С‹С‚СЊ РґРёРЅР°РјРёС‡РµСЃРєРёРј
+        self.fps = FPS  # Не уверен, может быть динамическим
         self.clock = pygame.time.Clock()
 
-        # Р—РґРµСЃСЊ РёРґС‘С‚ Р·Р°СЃС‚Р°РІРєР° Рё/РёР»Рё РІС‹Р±РѕСЂ СѓСЂРѕРІРЅСЏ(РґРѕРґРµР»С‹РІР°РµС‚СЃСЏ РїРѕС‚РѕРј, СЃРїРµСЂРІР° Р±СѓРґРµС‚ С‚РѕР»СЊРєРѕ Р·Р°СЃС‚Р°РІРєР° Рё РѕРґРёРЅ СѓСЂРѕРІРµРЅСЊ)
+        # Здесь идёт заставка и/или выбор уровня(доделывается потом, сперва будет только заставка и один уровень)
         if self.start_screen():
 
-            # Р—РґРµСЃСЊ РЅР°С‡РёРЅР°РµС‚СЃСЏ, СЃРѕР±СЃС‚РІРµРЅРЅРѕ, СЃР°Рј СѓСЂРѕРІРµРЅСЊ, С‚Р°Рє РєР°Рє РѕРЅ РїРѕРєР° РѕРґРёРЅ
+            # Здесь начинается, собственно, сам уровень, так как он пока один
             self.start_game()
 
-            # Р—РґРµСЃСЊ, С‚Р°Рє РєР°Рє РїРѕРєР° РѕРґРёРЅ СѓСЂРѕРІРµРЅСЊ, Р±СѓРґРµС‚ РїСЂРѕСЃС‚Рѕ СЌРєСЂР°РЅ РєРѕРЅС†Р° РёРіСЂС‹
+            # Здесь, так как пока один уровень, будет просто экран конца игры
             self.end_screen()
 
     def start_screen(self):
-        intro_text = ["Р—РђРЎРўРђР’РљРђ", "", "РџСЂР°РІРёР»Р° РёРіСЂС‹", "", "True"]
+        intro_text = ["ЗАСТАВКА", "", "Правила игры", "", "True"]
  
         background = pygame.transform.scale(load_image(START_BACKGROUND_FILENAME), (self.width, self.height))
         self.screen.blit(background, (0, 0))
@@ -72,8 +73,8 @@ class Main:
             self.clock.tick(10)
 
     def end_screen(self):
-        end_text = ["РљРѕРЅРµС†",
-                    "РќР°Р¶РјРёС‚Рµ Р»СЋР±СѓСЋ РєРЅРѕРїРєСѓ,", "С‡С‚РѕР±С‹ РІС‹Р№С‚Рё"]
+        end_text = ["Конец",
+                    "Нажмите любую кнопку,", "чтобы выйти"]
 
         background = pygame.transform.scale(load_image(END_BACKGROUND_FILENAME), (self.width, self.height))
         self.screen.blit(background, (0, 0))
@@ -97,18 +98,22 @@ class Main:
             self.clock.tick(10)
 
     def start_game(self):
-        # Р—РґРµСЃСЊ РґРѕР»Р¶РЅРѕ РёРґС‚Рё С‡С‚Рѕ-С‚Рѕ РІСЂРѕРґРµ Р·Р°РіСЂСѓР·РєРё РєР°СЂС‚С‹, СЂР°СЃСЃС‚Р°РІР»РµРЅРёРµ РІСЂР°РіРѕРІ Рё С‚Р°Рє РґР°Р»РµРµ
-        # Р”СЂСѓРіРёРјРё СЃР»РѕРІР°РјРё, С‚Рѕ, С‡С‚Рѕ РЅСѓР¶РЅРѕ РґР»СЏ РєР°Р¶РґРѕРіРѕ РѕС‚РґРµР»СЊРЅРѕ СѓСЂРѕРІРЅСЏ
-
-        # Р—РґРµСЃСЊ РїРѕРґСЉРµС…Р°Р»Р° С„РёРіРЅСЏ СЃРѕ СЃРїСЂР°Р№С‚Р°РјРё
-        background_group = pygame.sprite.Group()
-        all_sprites = pygame.sprite.LayeredUpdates()        
-        player_group = pygame.sprite.GroupSingle()
-        platforms_group = pygame.sprite.Group()
-        stairs_group = pygame.sprite.Group()
-        fire_group = pygame.sprite.Group()
-        groups_to_update_with_camera = [player_group, platforms_group,
-                                        stairs_group, fire_group]
+    # Здесь должно идти что-то вроде загрузки карты, расставление врагов и так далее
+    # Другими словами, то, что нужно для каждого отдельно уровня
+	
+    # Здесь подъехала фигня со спрайтами
+	all_sprites = pygame.sprite.LayeredUpdates()
+	background_group = pygame.sprite.Group()
+	player_group = pygame.sprite.GroupSingle()
+	platforms_group = pygame.sprite.Group()
+	stairs_group = pygame.sprite.Group()
+	fire_group = pygame.sprite.Group()
+	enemy_group = pygame.sprite.Group()	
+	bullet_group = pygame.sprite.Group()
+	
+	groups_to_update_with_camera = [player_group, platforms_group,	        
+                                                fire_group,	                                 
+                                                bullet_group,enemy_group]        
         
         bck = Background(background_group)
         all_sprites.add(bck, layer=-1)
@@ -117,69 +122,58 @@ class Main:
         level = load_level("level3.txt")
         player = spawnpoint = None
         camera = Camera()
+        print(len(level))
         for y in range(len(level)):
             for x in range(len(level[y])):
                 if level[y][x] == SYMB_FOR_PLATFORM_IN_LEVEL_FILE:
                     plt = Platform((x, y), platforms_group)
                     all_sprites.add(plt, layer=0)
-                elif level[y][x] == SYMB_FOR_STAIRS_BLCK_IN_LEVEL_FILE:
-                    strs = Stairs((x, y), stairs_group)
-                    all_sprites.add(strs, layer=1)
+                    
                 elif level[y][x] == SYMB_FOR_FIRE_IN_LEVEL_FILE:
-                    strs = Fire((x, y), fire_group)
-                    all_sprites.add(strs, layer=1)
+                    fire = Fire((x, y), fire_group)
+                    all_sprites.add(fire, layer=1)
+                    
                 elif level[y][x] == SYMB_FOR_PLAYER_IN_LEVEL_FILE:
                     start_level_point = (x, y)
                     spawnpoint = (x, y)
                     player = Player((x, y), player_group)
                     all_sprites.add(player, layer=2)
                     player.groups = player.groups()
-
-        left, right, up, down = False, False, False, False
-        hold = False
-        actions_list = [left, right, up, down]
+                
+                elif level[y][x] == 's':
+                    snail = Snail((x, y - 0.70), enemy_group)
+                    all_sprites.add(snail, layer=2)         
+                
+                
+        print(spawnpoint, fire_group)
+        left, right, up = False, False, False
+        actions_list = [left, right, up]
+        
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     terminate()
                     
                 if event.type == pygame.KEYDOWN:
-                    if not hold:
-                        if event.key in DCT_FOR_MOVING_PLAYER.keys():
-                            actions_list[DCT_FOR_MOVING_PLAYER[event.key]] = True
-                    else:
-                        if player.stair_coll:
-                            if event.key == pygame.K_w:
-                                up = True
-                                #print('up')
-                            if event.key == pygame.K_s:
-                                down = True  
+                    if event.key in DCT_FOR_MOVING_PLAYER.keys():
+                        actions_list[DCT_FOR_MOVING_PLAYER[event.key]] = True
+		    elif event.key == pygame.K_SPACE:	
+			player.shoot(bullet_group, all_sprites)		    
                                 
                 if event.type == pygame.KEYUP:
-                    if not hold:
-                        if event.key in DCT_FOR_MOVING_PLAYER.keys():
-                            actions_list[DCT_FOR_MOVING_PLAYER[event.key]] = False
-                    else:
-                        if player.stair_coll:
-                            if event.key == pygame.K_w:
-                                up = False
-                            if event.key == pygame.K_s:
-                                down = False
-                        
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                #if pygame.mouse.get_pressed()[0]:
-                    hold = True
-                
-                if event.type == pygame.MOUSEBUTTONUP:
-                    hold = False
+                    if event.key in DCT_FOR_MOVING_PLAYER.keys():
+                        actions_list[DCT_FOR_MOVING_PLAYER[event.key]] = False
                                    
-            player.update(*actions_list, hold, platforms_group,
-                          stairs_group, fire_group, spawnpoint)
+            player.update(*actions_list, platforms_group, fire_group,
+                          spawnpoint)
+            for enemy in enemy_group:
+                enemy.move()
             #player.update(*actions_list, platforms_group)
-            # Р’РѕР·РІСЂР°С‰РµРЅРёРµ СЌРєСЂР°РЅР° Рє РґРµС„РѕР»С‚Сѓ
+            # Возвращение экрана к дефолту
             self.screen.fill((0, 0, 0))
-            # print(player.stair_coll, hold)
             camera.update(player)
+	    for bullet in bullet_group:
+		bullet.update(enemy_group, platform_group)
             for group in groups_to_update_with_camera:
                 for sprite in group:
                     camera.apply(sprite)
@@ -231,7 +225,6 @@ class Camera:
     
 
 if __name__ == '__main__':
-    hold = False
     SCREEN_WIDTH = 1250
     SCREEN_HEIGHT = 1000
     FPS = 60
@@ -240,7 +233,6 @@ if __name__ == '__main__':
     LEVEL_FILENAME = 'level.txt'
     SYMB_FOR_PLATFORM_IN_LEVEL_FILE = '#'
     SYMB_FOR_PLAYER_IN_LEVEL_FILE = '@'
-    SYMB_FOR_STAIRS_BLCK_IN_LEVEL_FILE = '|'
     SYMB_FOR_FIRE_IN_LEVEL_FILE = 'F'
     DCT_FOR_MOVING_PLAYER = {pygame.K_w: 2, pygame.K_a: 1, pygame.K_d: 0}
     GAME_BACKGROUND_FILENAME = 'game_background.png'

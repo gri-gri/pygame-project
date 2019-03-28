@@ -1,6 +1,7 @@
 import os
 import sys
 import pygame
+SCREEN_WIDTH = 1250
 from other_sprites import *
 from helping_functions import *
 from player import *
@@ -116,8 +117,8 @@ class Main:
 
         #level = load_level(LEVEL_FILENAME)
         level = load_level("level3.txt")
-        player = checkpoint = None
-        camera = Camera()
+        player = spawnpoint = None
+        camera = Camera(groups_to_update_with_camera)
         #print(len(level))
         for y in range(len(level)):
             for x in range(len(level[y])):
@@ -130,23 +131,29 @@ class Main:
                     all_sprites.add(fire, layer=1)
                     
                 elif level[y][x] == SYMB_FOR_PLAYER_IN_LEVEL_FILE:
-                    start_checkpoint = Checkpoint_Tile((x, y), save_group)
+                    start_level_point = (x, y)
+                    spawnpoint = (x, y)
                     player = Player((x, y), player_group)
                     all_sprites.add(player, layer=2)
                     player.groups = player.groups()
+                    print(player.spawnpoint)
                 
                 elif level[y][x] == 's':
                     snail = Snail((x, y - 0.70), enemy_group)
-                    all_sprites.add(snail, layer=2)   
+                    all_sprites.add(snail, layer=2) 
+                    
+                elif level[y][x] == 'R':
+                    robot = Robot((x, y), enemy_group)
+                    print(robot.rect, robot.image, robot.health)
+                    all_sprites.add(robot, layer=2)                
                 
                 elif level[y][x] == 'S':
-                    cp = Checkpoint_Tile((x, y), save_group)
-                    all_sprites.add(cp, layer=1)                
+                    checkpoint = Checkpoint_Tile((x, y - 2.99), save_group)
+                    all_sprites.add(checkpoint, layer=1)                
                 
 
         left, right, up = False, False, False
         actions_list = [left, right, up]
-        checkpoint = start_checkpoint
         
         while True:
             for event in pygame.event.get():
@@ -165,20 +172,22 @@ class Main:
                                    
             for enemy in enemy_group:
                 enemy.move()
+            #player.update(*actions_list, platforms_group)
+            # Возвращение экрана к дефолту
             self.screen.fill((0, 0, 0))
             camera.update(player)
             
             for bullet in bullet_group: 
-                bullet.update(enemy_group, platforms_group)           
+                bullet.update(enemy_group if bullet.flag_to_diff == 'enemy' else player, platforms_group, SCREEN_WIDTH)           
                             
             for group in groups_to_update_with_camera:
                 for sprite in group:
                     camera.apply(sprite)
             camera.word_r, camera.word_l = False, False
             camera.word_up, camera.word_down = False, False
-            checkpoint = player.update(*actions_list, player_group, platforms_group, bullet_group,
-                                       [fire_group, enemy_group],
-                                       checkpoint, save_group)    
+            player.update(*actions_list, platforms_group, bullet_group, 
+                          [fire_group, enemy_group],
+                          spawnpoint, save_group, camera)    
             all_sprites.draw(self.screen)
             
             pygame.display.flip()
@@ -193,7 +202,8 @@ class Background(pygame.sprite.Sprite):
         
         
 class Camera:
-    def __init__(self):
+    def __init__(self, update_group):
+        self.update_group = update_group
         self.dx = SCREEN_WIDTH
         self.dy = SCREEN_HEIGHT
         self.word_r = False
@@ -231,9 +241,9 @@ class Camera:
         if l:
             obj.rect.x += self.dx 
         if up:
-            obj.rect.y += self.dy
-        if down:
             obj.rect.y -= self.dy
+        if down:
+            obj.rect.y += self.dy
             
 
 if __name__ == '__main__':
