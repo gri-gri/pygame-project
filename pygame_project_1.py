@@ -118,7 +118,7 @@ class Main:
         bck = Background(background_group)
         all_sprites.add(bck, layer=-1)
 
-        level = load_level("level4.txt")
+        level = load_level("level5.txt")
         player = checkpoint = start_checkpoint = None
         camera = Camera(groups_to_update_with_camera)
         for y in range(len(level)):

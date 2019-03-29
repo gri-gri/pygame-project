@@ -40,13 +40,7 @@ class Checkpoint_Tile(Tile):
         self.name = 'not_checked'
         
     def collided(self):
-        self.image = pygame.transform.scale(load_image('flag_appear.png', color_key=-2), (30, 50))
-        
-        '''self.image = pygame.transform.scale(load_image('flag_appear.png', color_key=-2), (50, 50))
-        print(True, self.image.get_rect(), self.pos)
-        self.rect = self.image.get_rect().move(TILE_WIDTH*self.pos[0], TILE_HEIGHT*self.pos[1])
-        print('checkpoint retoken {}'.format(self.rect))'''
-        
+        self.image = pygame.transform.scale(load_image('flag_appear.png', color_key=-2), (30, 50))    
         self.name = 'checked'
 
 class End_tile(Tile):
@@ -94,7 +88,7 @@ class Enemy(pygame.sprite.Sprite):
 class Snail(Enemy):
     def __init__(self, pos, group):
         super().__init__(pos, 'snail.png', -1, group)
-        self.health = 5
+        self.health = 3
         self.speed_x = 1  
     
     def move(self):
