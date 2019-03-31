@@ -2,12 +2,15 @@ import pygame
 from helping_functions import load_image
 
 TILE_WIDTH = TILE_HEIGHT = 50
-    
+
+
+#Обычный тайл, от которого наследуются все остальные
 class Tile(pygame.sprite.Sprite):
     def __init__(self, pos, image_filename, color_key, *groups):
         super().__init__(*groups)
         self.image = load_image(image_filename, color_key=color_key)
-        self.rect = self.image.get_rect().move(TILE_WIDTH*pos[0], TILE_HEIGHT*pos[1])
+        self.rect = self.image.get_rect().move(TILE_WIDTH*pos[0], 
+                                               TILE_HEIGHT*pos[1])
         self.mask = pygame.mask.from_surface(self.image)
     
     def move(self, pos):
@@ -23,26 +26,35 @@ class Tile(pygame.sprite.Sprite):
         return super().groups()    
 
 
+#Обычные платформы
 class Platform(Tile):
     def __init__(self, pos, *groups):
         super().__init__(pos, 'platform.png', -2, *groups)
+       
         
+# Огонь - что-то вроде шипов     
 class Fire(Tile):
     def __init__(self, pos, *groups):
         super().__init__(pos, 'fire.png', -2, *groups) 
 
+
+# Чекпоинты
 class Checkpoint_Tile(Tile):
     def __init__(self, pos, *groups):
         super().__init__(pos, 'flag.png', -2, *groups)
         self.pos = pos
         self.image = pygame.transform.scale(self.image, (30, 50))
-        self.rect = self.image.get_rect().move(TILE_WIDTH*pos[0], TILE_HEIGHT*pos[1])
+        self.rect = self.image.get_rect().move(TILE_WIDTH*pos[0], 
+                                               TILE_HEIGHT*pos[1])
         self.name = 'not_checked'
         
     def collided(self):
-        self.image = pygame.transform.scale(load_image('flag_appear.png', color_key=-2), (30, 50))    
+        self.image = pygame.transform.scale(load_image('flag_appear.png',
+                                                       color_key=-2), (30, 50))    
         self.name = 'checked'
 
+
+# Финиш - при коллайде с ним уровень заканчивается
 class End_tile(Tile):
     def __init__(self, pos, *groups):
         super().__init__(pos, 'end_flag.png', -2, *groups)
@@ -52,12 +64,15 @@ class End_tile(Tile):
             return True
         return False
 
+
+# Общий класс для врагов, от которого они наследуются
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, pos, image_filename, color_key, group):
         super().__init__(group)
         self.image_name = image_filename
         self.image = load_image(self.image_name, color_key=color_key)
-        self.rect = self.image.get_rect().move(TILE_WIDTH*pos[0], TILE_HEIGHT*pos[1])
+        self.rect = self.image.get_rect().move(TILE_WIDTH*pos[0],
+                                               TILE_HEIGHT*pos[1])
         self.mask = pygame.mask.from_surface(self.image)
         self.damaged = False
         self.damaged_time = 0
@@ -85,6 +100,7 @@ class Enemy(pygame.sprite.Sprite):
         pass  
         
 
+# Улитка
 class Snail(Enemy):
     def __init__(self, pos, group):
         super().__init__(pos, 'snail.png', -1, group)
@@ -118,13 +134,15 @@ class Snail(Enemy):
         else:
             super().kill()        
         
-
+        
+# Летающий-стреляющий робот
 class Robot(Enemy):
     def __init__(self, pos, group):
         super().__init__(pos, 'robot.png', -1, group)
         self.image_name = 'robot.png'
         self.image = load_image(self.image_name, color_key=-1)
-        self.rect = self.image.get_rect().move(TILE_WIDTH*pos[0], TILE_HEIGHT*pos[1])
+        self.rect = self.image.get_rect().move(TILE_WIDTH*pos[0],
+                                               TILE_HEIGHT*pos[1])
         self.mask = pygame.mask.from_surface(self.image)        
         self.speed_y = 5
         self.bullet_time = 0
@@ -165,12 +183,14 @@ class Robot(Enemy):
         self.image = load_image('robot_damaged.png', -1)
         
         
+# Пули, которыми стреляет герой  
 class Bullet_for_enemy(pygame.sprite.Sprite):	
     GRAVITY = 0.5	
     def __init__(self, pos, coef, *groups):
         self.flag_to_diff = 'enemy'
         super().__init__(*groups)	
-        self.image = pygame.transform.scale(load_image('bullet_for_enemy.png', color_key=-2), (10, 10))	
+        self.image = pygame.transform.scale(load_image('bullet_for_enemy.png',
+                                                       color_key=-2), (10, 10))	
         self.rect = self.image.get_rect().move(pos[0], pos[1])	
         self.mask = pygame.mask.from_surface(self.image)	
         self.x_velocity = 10 * coef
@@ -183,20 +203,20 @@ class Bullet_for_enemy(pygame.sprite.Sprite):
             if pygame.sprite.collide_mask(self, enemy):	
                 enemy.bullet_touch(self.damage)	
                 flag = True	
-        if flag or pygame.sprite.spritecollideany(self,	
-                                                  platform_group,	
-                                                  collided=pygame.sprite.collide_mask):
+        if flag or pygame.sprite.spritecollideany(self,	platform_group, 
+                                        collided=pygame.sprite.collide_mask):
             super().kill()
         elif self.rect.x <= 0 or self.rect.x + self.rect.w >= width:	
             super().kill()
     
-    
+# Пули, которыми стреляют враги
 class Maslina_for_player(pygame.sprite.Sprite):	
     GRAVITY = 0.5	
     def __init__(self, pos, coef, *groups):	
         self.flag_to_diff = 'player'
         super().__init__(*groups)	
-        self.image = pygame.transform.scale(load_image('bullet_for_player.png', color_key=-2), (10, 10))	
+        self.image = pygame.transform.scale(load_image('bullet_for_player.png',
+                                                       color_key=-2), (10, 10))	
         self.rect = self.image.get_rect().move(pos[0], pos[1])	
         self.mask = pygame.mask.from_surface(self.image)	
         self.x_velocity = 10 * coef
@@ -212,85 +232,3 @@ class Maslina_for_player(pygame.sprite.Sprite):
                                           collided=pygame.sprite.collide_mask) \
            or self.rect.x <= 0 or self.rect.x + self.rect.w >= width:	
                 super().kill()
-
-class Laser(pygame.sprite.Sprite):
-    GRAVITY = 1	
-    def __init__(self, pos, coef, *groups):	
-        self.flag_to_diff = 'player'
-        super().__init__(*groups)	
-        self.image = load_image('laser.png', color_key=-2)
-        self.rect = self.image.get_rect().move(pos[0], pos[1])	
-        self.mask = pygame.mask.from_surface(self.image)	
-        self.x_velocity = 15 * coef
-        self.damage = 1
-
-    def update(self, player, platform_group, width):	
-        self.rect.move_ip(self.x_velocity, Maslina_for_player.GRAVITY)		
-        if pygame.sprite.collide_mask(self, player):	
-            player.kill()
-            super().kill()
-        if pygame.sprite.spritecollideany(self,
-                                          platform_group,
-                                          collided=pygame.sprite.collide_mask) \
-           or self.rect.x <= 0 or self.rect.x + self.rect.w >= width:	
-                super().kill()
-
-class Boss(Enemy):
-    def __init__(self, pos, group):
-        super().__init__(pos, 'big_mouth.png', -2, group)
-        self.first_pic = self.image.copy()
-        self.big_pic = load_image('shoop_da_whoop_big.png', -2)
-        self.health = 20
-        self.lasers = True
-        self.bigger = False
-        self.time = 0
-        self.dy = 0
-        self.maxdy = 50
-        self.dy_coef = -1
-        self.dyspeed = 1
-        self.dyspeed *= self.dy_coef
-        self.change_direction()
-        self.pos = pos
-
-    def update(self, player, laser_group, all_sprite):
-        if player.rect.centerx >= self.rect.centerx and self.image != self.first_pic:
-            self.change_direction()
-        elif player.rect.centerx <= self.rect.centerx and self.image == self.first_pic:
-            self.change_direction()
-
-        if abs(self.dy) <= self.maxdy:
-            self.dy += self.dyspeed
-        elif abs(self.dy) > self.maxdy:
-            self.dy = self.maxdy if self.dy > 0 else -self.maxdy
-            self.dyspeed *= self.dy_coef
-        print(self.dy, self.dyspeed, self.maxdy)
-        self.rect.move_ip(0, self.dyspeed)
-        print(self.rect)
-        self.time += 1
-        if self.time % 120 == 0 and self.time < 600:
-            lsr = Laser(self.rect.center, -1 if self.image != self.first_pic else 1, laser_group)
-            all_sprite.add(lsr, layer=2)
-        if self.time > 600:
-            if self.image != self.first_pic:
-                self.image = self.big_pic
-                self.change_direction()
-            else:
-                self.image = self.big_pic
-            self.rect.center = self.rect.midleft
-        if self.time > 720:
-            self.time = 0
-            if self.image != self.big_pic:
-                self.image = self.first_pic
-                self.change_direction()
-            else:
-                self.image = self.first_pic
-            self.rect.midleft = self.rect.center
-
-        if abs(self.rect.x - self.pos[0]*TILE_WIDTH + 200) >= 0:
-            self.rect.x = self.pos[0]*TILE_WIDTH
-
-    def bullet_touch(self, damage):
-        self.health -= self.damage
-        
-            
-        

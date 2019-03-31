@@ -2,9 +2,7 @@ import os
 import sys
 import pygame
 
-SYMB_FOR_SPARE_PLACE_IN_LEVEl_FILE = '.'
-
-
+#Загрузка изображений
 def load_image(name, color_key=None):
     
     fullname = os.path.join('data', name)
@@ -23,8 +21,3 @@ def load_image(name, color_key=None):
     else:
         image = image.convert_alpha()
     return image
-
-
-def terminate():
-    pygame.quit()
-    sys.exit()
